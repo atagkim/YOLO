@@ -27,7 +27,8 @@ int main(int argc, char* argv[])
     cv::CascadeClassifier face_classifier;
 
     face_classifier.load("C:\\YOLO\\newTech\\opencv\\sources\\data\\haarcascades\\haarcascade_frontalface_default.xml");
-    
+  
+
     cv::Mat frame;
 
     for (; ; ) {
