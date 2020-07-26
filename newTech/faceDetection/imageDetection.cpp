@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 {
 
     //load image, in this case it's allready gray 
-    Mat img = imread("input1.jpg");
+    Mat img = imread("input6.jpg");
 
     Mat grayImg;
     cvtColor(img, grayImg, CV_BGR2GRAY);
