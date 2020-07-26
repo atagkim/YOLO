@@ -14,7 +14,6 @@ using namespace cv;
 
 int main(int argc, char** argv)
 {
-
     //load image, in this case it's allready gray 
     Mat img = imread("input6.jpg");
 
