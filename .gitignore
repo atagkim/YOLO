@@ -1,1 +1,3 @@
-newTech/
+newTech/opencv/
+newTech/faceDetection/*
+!newTech/faceDetection/*.cpp
