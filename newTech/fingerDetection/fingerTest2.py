@@ -15,9 +15,42 @@ def detect(img, cascade):
 def removeFaceAra(img, cascade):
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     gray = cv.equalizeHist(gray)
-    rect = detect(gray, cascade)
+    rects = detect(gray, cascade)
 
-    return rect
+    height, width = img.shape[:2]
+
+    for x1, y1, x2, y2 in rects:
+        cv.rectangle(img, (x1 - 10, 0), (x2 + 10, height), (0, 0, 0), -1)
+
+    return img
+
+
+def make_mask_image(img_bgr):
+    img_hsv = cv.cvtColor(img_bgr, cv.COLOR_BGR2HSV)
+
+    # img_h,img_s,img_v = cv.split(img_hsv)
+
+    low = (0, 30, 0)
+    high = (15, 255, 255)
+
+    img_mask = cv.inRange(img_hsv, low, high)
+    return img_mask
+
+
+def distanceBetweenTwoPoints(start, end):
+    x1, y1 = start
+    x2, y2 = end
+
+    return int(np.sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2)))
+
+
+def calculateAngle(A, B):
+    A_norm = np.linalg.norm(A)
+    B_norm = np.linalg.norm(B)
+    C = np.dot(A, B)
+
+    angle = np.arccos(C / (A_norm * B_norm)) * 180 / np.pi
+    return angle
 
 
 def findMaxArea(contours):
@@ -43,22 +76,6 @@ def findMaxArea(contours):
         max_area = -1
 
     return max_area, max_contour
-
-
-def distanceBetweenTwoPoints(start, end):
-    x1, y1 = start
-    x2, y2 = end
-
-    return int(np.sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2)))
-
-
-def calculateAngle(A, B):
-    A_norm = np.linalg.norm(A)
-    B_norm = np.linalg.norm(B)
-    C = np.dot(A, B)
-
-    angle = np.arccos(C / (A_norm * B_norm)) * 180 / np.pi
-    return angle
 
 
 def getFingerPosition(max_contour, img_result, debug):
@@ -152,20 +169,19 @@ def getFingerPosition(max_contour, img_result, debug):
     return 1, new_points
 
 
-def process(img_bgr, img_binary, debug):
+def process(img_bgr, debug):
     img_result = img_bgr.copy()
 
-    # # STEP 1
-    # img_bgr = removeFaceAra(img_bgr, cascade)
+    # STEP 1
+    img_bgr = removeFaceAra(img_bgr, cascade)
 
-    # # STEP 2
-    # img_binary = make_mask_image(img_bgr)
+    # STEP 2
+    img_binary = make_mask_image(img_bgr)
 
-    # # STEP 3
-    # kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    # img_binary = cv.morphologyEx(img_binary, cv.MORPH_CLOSE, kernel, 1)
-    # if debug:
-    #   cv.imshow("Binary", img_binary)
+    # STEP 3
+    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
+    img_binary = cv.morphologyEx(img_binary, cv.MORPH_CLOSE, kernel, 1)
+    cv.imshow("Binary", img_binary)
 
     # STEP 4
     contours, hierarchy = cv.findContours(img_binary, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
@@ -195,43 +211,26 @@ def process(img_bgr, img_binary, debug):
 
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
-cascade = cv.CascadeClassifier(cv.samples.findFile(current_file_path + "\haarcascade_frontalface_alt4.xml"))
-cap = cv.VideoCapture('hand1.avi')
+cascade = cv.CascadeClassifier(cv.samples.findFile(current_file_path + "\haarcascade_frontalface_alt3.xml"))
 
-#  http://layer0.authentise.com/segment-background-using-computer-vision.html
-fgbg = cv.createBackgroundSubtractorMOG2(varThreshold=200, detectShadows=0)
+# cap = cv.VideoCapture('test.avi')
 
-index = 0
+cap = cv.VideoCapture(0)
 
-while (1):
-    index = index + 1
+while True:
 
-    ret, frame = cap.read()
+    ret, img_bgr = cap.read()
+
     if ret == False:
-        break;
+        break
 
-    frame = cv.flip(frame, 1)
+    img_result = process(img_bgr, debug=False)
 
-    blur = cv.GaussianBlur(frame, (5, 5), 0)
-    rect = removeFaceAra(frame, cascade)
-
-    fgmask = fgbg.apply(blur, learningRate=0)
-
-    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    fgmask = cv.morphologyEx(fgmask, cv.MORPH_CLOSE, kernel, 2)
-
-    height, width = frame.shape[:2]
-    for x1, y1, x2, y2 in rect:
-        cv.rectangle(fgmask, (x1 - 10, 0), (x2 + 10, height), (0, 0, 0), -1)
-
-    img_result = process(frame, fgmask, debug=False)
-
-    cv.imshow('mask', fgmask)
-    cv.imshow('result', img_result)
-
-    key = cv.waitKey(30) & 0xff
+    key = cv.waitKey(1)
     if key == 27:
         break
+
+    cv.imshow("Result", img_result)
 
 cap.release()
 cv.destroyAllWindows()
