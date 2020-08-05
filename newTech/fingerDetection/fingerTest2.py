@@ -4,6 +4,7 @@ import os
 
 
 def detect(img, cascade):
+
     rects = cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30),
                                      flags=cv.CASCADE_SCALE_IMAGE)
     if len(rects) == 0:
@@ -13,6 +14,7 @@ def detect(img, cascade):
 
 
 def removeFaceAra(img, cascade):
+
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     gray = cv.equalizeHist(gray)
     rects = detect(gray, cascade)
@@ -57,9 +59,11 @@ def findMaxArea(contours):
     max_contour = None
     max_area = -1
 
+    # 가장 큰 애를 찾기위해 포문 돌면서 계속 갱신
     for contour in contours:
         area = cv.contourArea(contour)
 
+        # boundingRect는 주어진 contour의 외접하는 사각형 얻는것
         x, y, w, h = cv.boundingRect(contour)
 
         if (w * h) * 0.4 > area:
@@ -170,39 +174,52 @@ def getFingerPosition(max_contour, img_result, debug):
 
 
 def process(img_bgr, debug):
+
+    # 프로세스 과정을 통해 만들 이미지 결과물 선언
     img_result = img_bgr.copy()
 
-    # STEP 1
+
+    # STEP 1: 얼굴인식을 통해 얼굴파트 지우기 => 이를 통해 손가락 인식할때 얼굴색으로 인한 탐지실패를 막음
     img_bgr = removeFaceAra(img_bgr, cascade)
 
-    # STEP 2
+
+    # STEP 2: ??
     img_binary = make_mask_image(img_bgr)
 
-    # STEP 3
+
+    # STEP 3: 흑백화면으로 현재 인식되는 이미지 보여주기
     kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
     img_binary = cv.morphologyEx(img_binary, cv.MORPH_CLOSE, kernel, 1)
     cv.imshow("Binary", img_binary)
 
-    # STEP 4
+
+    # STEP 4: contour 찾는 과정
     contours, hierarchy = cv.findContours(img_binary, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
+
+    # 걍 디버그용
     if debug:
         for cnt in contours:
             cv.drawContours(img_result, [cnt], 0, (255, 0, 0), 3)
 
-            # STEP 5
+
+    # STEP 5: 찾은 contour 기반으로 맥스 에어리어 설정
     max_area, max_contour = findMaxArea(contours)
 
+    # 맥스에어리어 안잡힐시 아웃
     if max_area == -1:
         return img_result
 
+    # 걍 디버그용
     if debug:
         cv.drawContours(img_result, [max_contour], 0, (0, 0, 255), 3)
 
-        # STEP 6
+
+    # STEP 6: 손가락 위치잡기
     ret, points = getFingerPosition(max_contour, img_result, debug)
 
-    # STEP 7
+
+    # STEP 7: 찾은 손꾸락 동구라미 치기
     if ret > 0 and len(points) > 0:
         for point in points:
             cv.circle(img_result, point, 20, [255, 0, 255], 5)
@@ -210,27 +227,41 @@ def process(img_bgr, debug):
     return img_result
 
 
+
+# main
+
+# 걍 디렉토리 경로 뽑는거임 아래에있는 얼굴인식 모델 접근할때 쓰기위한거
 current_file_path = os.path.dirname(os.path.realpath(__file__))
+# 얼굴인식 모델 로딩
 cascade = cv.CascadeClassifier(cv.samples.findFile(current_file_path + "\haarcascade_frontalface_alt3.xml"))
 
+
+# cap은 이미지 buf라고 보면됨. videocapture안의 변수가 0이면 캠으로, 경로면 영상이.
+cap = cv.VideoCapture(0)
 # cap = cv.VideoCapture('test.avi')
 
-cap = cv.VideoCapture(0)
 
 while True:
 
+    # cap을 통해 현재 이미지를 읽음
     ret, img_bgr = cap.read()
 
+    # 이미지 못 읽을시 아웃
     if ret == False:
         break
 
+    # 이미지를 가지고 정의된 process 함수 실행
     img_result = process(img_bgr, debug=False)
 
+    # esc누르면 반복문 밖으로 나와요!
     key = cv.waitKey(1)
     if key == 27:
         break
 
+    # 결과 보여주기
     cv.imshow("Result", img_result)
 
+
+# free 과정
 cap.release()
 cv.destroyAllWindows()
