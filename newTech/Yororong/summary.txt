@@ -1,0 +1,24 @@
+1. 카메라에서 frame을 뽑음 & 좌우반전
+2. z가 눌렸는지 대기하다가 z가 눌리면 hand_histogram을 뽑음
+    1) hand_histogram에선 BGR로 뽑힌 색상을 HSV로 변환
+    (RGB모델은 정육면체 모델형태, HSV는 색, 채도, 명도를 모두 알 수 있고 원뿔형태 모델)
+    2)그 9개 네모칸을 기준으로 hand_histogram 만듦 - 자세한 네모칸 좌표, 크기 같은거 조정하는건 주석으로 설명써놓음
+3. hand_histogram이 뽑혔으면 이미지에서 hand_histogram에 있는 색만 흰색으로 표시 & 원래 이미지해서 손 색이랑 같은 친구들만 뽑음
+4. 3번에서 뽑은 이미지의 윤곽선만 뽑음
+5. 윤곽선 가진 애들 중에 면적 젤 큰애 뽑음(그래서 얼굴이 더 가까우면 안댐)
+6. 5번에서 뽑은 윤곽선 기준으로 무게중심 구함
+7. 6번에서 뽑은 무게중심 원으로 표시해줌
+8. 윤곽선 점들 기준으로 컨벡스헐 계산하고, 무게중심이랑 가장 먼 지점 구함
+9. 그거 점으로 찍어줌 + traverse_point 20개 까지 계속 표시
+
+
+<참고>
+BGR -> HSV(색조, 채도, 명도)
+H는 0~180
+S는 0~255
+V는 0~255로 표현
+
+backprojection 검색해보면 동일 색 뽑는거 많이나옴
+
+https://dev.to/amarlearning/finger-detection-and-tracking-using-opencv-and-python-586m
+사실 이거 그자체
