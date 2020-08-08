@@ -203,8 +203,8 @@ def process(img_bgr, debug):
             cv.drawContours(img_result, [cnt], 0, (255, 0, 0), 3)
 
 
-    # STEP 5: 찾은 contour 기반으로 맥스 에어리어 설정
-    max_area, max_contour = findMaxArea(contours)
+    # STEP  5: 찾은 contour 기반으로 맥스 에어리어 설정
+    max_area, max_contour =findMaxArea(contours)
 
     # 맥스에어리어 안잡힐시 아웃
     if max_area == -1:
