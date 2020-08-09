@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import pyautogui
 
 hand_hist = None
 traverse_point = []
@@ -9,6 +10,8 @@ hand_rect_one_y = None
 
 hand_rect_two_x = None
 hand_rect_two_y = None
+
+chkfst = True
 
 
 def rescale_frame(frame, wpercent=130, hpercent=130):
@@ -159,6 +162,8 @@ def manage_image_opr(frame, hand_hist):
     cv2.circle(frame, cnt_centroid, 5, [255, 0, 255], -1)
     #중간 지점 원그려줌
 
+    global chkfst
+
     if max_cont is not None:
         #윤곽선 기준으로 convexity defect찾는다.
         hull = cv2.convexHull(max_cont, returnPoints=False)
@@ -168,6 +173,20 @@ def manage_image_opr(frame, hand_hist):
         #무게중심이랑 가장 먼 지점 계산
         print("Centroid : " + str(cnt_centroid) + ", farthest Point : " + str(far_point))
         cv2.circle(frame, far_point, 5, [0, 0, 255], -1)
+        #수정하면 그림 그리기 가능
+
+        ##마우스 제어
+        if chkfst == True :
+            chkfst = False
+            pyautogui.moveTo(far_point)
+            pyautogui.mouseDown()
+        pyautogui.moveTo(far_point)
+
+        ##프레임 같이쓰면 이런식으로 정지가능인데 따로써서 정지안되는중
+        # chkstop = cv2.waitKey(1)
+        # if chkstop & 0xFF == ord('x'):
+        #     pyautogui.mouseUp()
+
         if len(traverse_point) < 20:
             traverse_point.append(far_point)
         else:
@@ -175,7 +194,6 @@ def manage_image_opr(frame, hand_hist):
             traverse_point.append(far_point)
 
         draw_circles(frame, traverse_point)
-
 
 def main():
     #hand_hist는 처음 네모칸에 들어간 손바닥 의미
@@ -209,8 +227,10 @@ def main():
         cv2.imshow("Live Feed", rescale_frame(frame))
         #화면 표시해줌, 화면 크기 조정 함수
 
+
         if pressed_key == 27:
             break
+
 
     cv2.destroyAllWindows()
     capture.release()
