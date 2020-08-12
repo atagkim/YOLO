@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import time
 
-
-
+'''
+# step1
 # A required callback method that goes into the trackbar function.
 def nothing(x):
     pass
@@ -87,14 +87,9 @@ cv2.destroyAllWindows()
 
 
 
-
-
-
-
-
-
+#step2
 # This variable determines if we want to load color range from memory or use the ones defined here. 
-load_from_disk = True
+load_from_disk = False
 
 # If true then load color range from memory
 if load_from_disk:
@@ -124,8 +119,9 @@ while(1):
             upper_range = penval[1]
             
     # Otherwise define your own custom values for upper and lower range.
-    else:             
-       lower_range  = np.array([26,80,147])
+    else:
+       #lower_range  = np.array([26,80,147])
+       lower_range = np.array([32, 80, 140])
        upper_range = np.array([81,255,255])
     
     mask = cv2.inRange(hsv, lower_range, upper_range)
@@ -152,10 +148,9 @@ cap.release()
 
 
 
-
-
+#step3
 # This variable determines if we want to load color range from memory or use the ones defined in notebook. 
-load_from_disk = True
+load_from_disk = False
 
 # If true then load color range from memory
 if load_from_disk:
@@ -188,9 +183,10 @@ while(1):
             upper_range = penval[1]
             
     # Otherwise define your own custom values for upper and lower range.
-    else:             
-       lower_range  = np.array([26,80,147])
-       upper_range = np.array([81,255,255])
+    else:
+        # lower_range  = np.array([26,80,147])
+        lower_range = np.array([32, 80, 140])
+        upper_range = np.array([81,255,255])
     
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
@@ -226,10 +222,8 @@ cap.release()
 
 
 
-
-
-
-load_from_disk = True
+#step4
+load_from_disk = False
 if load_from_disk:
     penval = np.load('penval.npy')
 
@@ -265,9 +259,10 @@ while(1):
             upper_range = penval[1]
             
     # Otherwise define your own custom values for upper and lower range.
-    else:             
-       lower_range  = np.array([26,80,147])
-       upper_range = np.array([81,255,255])
+    else:
+        # lower_range  = np.array([26,80,147])
+        lower_range = np.array([32, 80, 140])
+        upper_range = np.array([81,255,255])
     
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
@@ -320,9 +315,8 @@ cap.release()
 
 
 
-
-
-load_from_disk = True
+#step5
+load_from_disk = False
 if load_from_disk:
     penval = np.load('penval.npy')
 
@@ -367,9 +361,10 @@ while(1):
             upper_range = penval[1]
             
     # Otherwise define your own custom values for upper and lower range.
-    else:             
-       lower_range  = np.array([26,80,147])
-       upper_range = np.array([81,255,255])
+    else:
+        # lower_range  = np.array([26,80,147])
+        lower_range = np.array([25, 70, 120])
+        upper_range = np.array([81,255,255])
     
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
@@ -433,8 +428,12 @@ while(1):
         
 cv2.destroyAllWindows()
 cap.release()
+'''
 
-load_from_disk = True
+
+
+#step6
+load_from_disk = False
 if load_from_disk:
     penval = np.load('penval.npy')
 
@@ -514,9 +513,10 @@ while(1):
             upper_range = penval[1]
             
     # Otherwise define your own custom values for upper and lower range.
-    else:             
-       lower_range  = np.array([26,80,147])
-       upper_range = np.array([81,255,255])
+    else:
+        # lower_range  = np.array([26,80,147])
+        lower_range = np.array([15, 105, 105])
+        upper_range = np.array([81,255,255])
     
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
