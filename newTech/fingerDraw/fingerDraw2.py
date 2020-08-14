@@ -453,6 +453,8 @@ pen_img = cv2.resize(cv2.imread('pen.png',1), (50, 50))
 eraser_img = cv2.resize(cv2.imread('eraser.jpg',1), (50, 50))
 cam1_img = cv2.resize(cv2.imread('camera1.png',1), (50, 50))
 cam2_img = cv2.resize(cv2.imread('camera2.png',1), (50, 50))
+change_color_img = cv2.resize(cv2.imread('change_color_img.png',1), (50, 50))
+
 
 kernel = np.ones((5,5),np.uint8)
 
@@ -488,6 +490,8 @@ clear = False
 cap1 = False
 cap2 = False
 
+pen_color = [255,0,0]
+
 while(1):
     _, frame = cap.read()
     frame = cv2.flip(frame, 1 )
@@ -500,15 +504,18 @@ while(1):
     top_left = frame[0: 50, 0: 50]
     top_left_cap1 = frame[0: 50, 150: 200]
     top_left_cap2 = frame[0: 50, 300: 350]
+    top_left_change_color = frame[0: 50, 450: 500]
     fgmask = backgroundobject.apply(top_left)
     fgmask_cap1 = backgroundobject.apply(top_left_cap1)
     fgmask_cap2 = backgroundobject.apply(top_left_cap2)
+    fgmask_change_color = backgroundobject.apply(top_left_change_color)
     
     # Note the number of pixels that are white, this is the level of disruption.
     switch_thresh = np.sum(fgmask==255)
     cap1_thresh = np.sum(fgmask_cap1==255)
     cap2_thresh = np.sum(fgmask_cap2==255)
-    
+    change_color_thresh = np.sum(fgmask_change_color==255)
+
     # If the disruption is greater than background threshold and there has been some time after the previous switch then you 
     # can change the object type.
     if switch_thresh > background_threshold  and (time.time() - last_switch) > 1:
@@ -527,6 +534,16 @@ while(1):
     if cap2_thresh > background_threshold and (time.time() - last_switch) > 1:
         cap2 = True
 
+    if change_color_thresh > background_threshold and (time.time() - last_switch) > 1:
+        time.sleep(1)
+        print('펜 컬러 변경')
+        if pen_color[0] and 255:
+            pen_color[0] = 0
+            pen_color[2] = 255
+        else:
+            pen_color[0] = 255
+            pen_color[2] = 0
+
 
     # Convert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -538,8 +555,8 @@ while(1):
             
     # Otherwise define your own custom values for upper and lower range.
     else:
-        # lower_range  = np.array([26,80,147])
-        lower_range = np.array([55, 40, 0])
+        lower_range  = np.array([20,60,75])
+        # lower_range = np.array([55, 40, 0])
         upper_range = np.array([65,255,255])
     
     mask = cv2.inRange(hsv, lower_range, upper_range)
@@ -568,7 +585,7 @@ while(1):
             
             if switch == 'Pen':
                 # Draw the line on the canvas
-                canvas = cv2.line(canvas, (x1,y1), (x2,y2), [255,0,0], 5)
+                canvas = cv2.line(canvas, (x1,y1), (x2,y2), pen_color, 5)
                 
             else:
                 cv2.circle(canvas, (x2, y2), 20, (0,0,0), -1)
@@ -604,6 +621,7 @@ while(1):
 
     frame[0: 50, 150: 200] = cam1_img
     frame[0: 50, 300: 350] = cam2_img
+    frame[0: 50, 450: 500] = change_color_img
 
     cv2.imshow('image',frame)
 
@@ -637,14 +655,18 @@ while(1):
         clear = False
 
     if cap1 == True:
+        time.sleep(1)
         print("화면 캡쳐")
         cv2.imwrite("Cam Test.png", frame)
         cap1 = False
 
     if cap2 == True:
+        time.sleep(1)
         print("그림판 캡쳐")
         cv2.imwrite("Paint Test.png", canvas)
         cap2 = False
-        
+
+
+
 cv2.destroyAllWindows()
 cap.release()
