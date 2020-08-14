@@ -451,6 +451,8 @@ cap.set(4,720)
 # Load these 2 images and resize them to the same size.
 pen_img = cv2.resize(cv2.imread('pen.png',1), (50, 50))
 eraser_img = cv2.resize(cv2.imread('eraser.jpg',1), (50, 50))
+cam1_img = cv2.resize(cv2.imread('camera1.png',1), (50, 50))
+cam2_img = cv2.resize(cv2.imread('camera2.png',1), (50, 50))
 
 kernel = np.ones((5,5),np.uint8)
 
@@ -483,6 +485,8 @@ wiper_thresh = 40000
 
 # A varaible which tells when to clear canvas
 clear = False
+cap1 = False
+cap2 = False
 
 while(1):
     _, frame = cap.read()
@@ -494,10 +498,16 @@ while(1):
         
     # Take the top left of the frame and apply the background subtractor there    
     top_left = frame[0: 50, 0: 50]
+    top_left_cap1 = frame[0: 50, 150: 200]
+    top_left_cap2 = frame[0: 50, 300: 350]
     fgmask = backgroundobject.apply(top_left)
+    fgmask_cap1 = backgroundobject.apply(top_left_cap1)
+    fgmask_cap2 = backgroundobject.apply(top_left_cap2)
     
     # Note the number of pixels that are white, this is the level of disruption.
     switch_thresh = np.sum(fgmask==255)
+    cap1_thresh = np.sum(fgmask_cap1==255)
+    cap2_thresh = np.sum(fgmask_cap2==255)
     
     # If the disruption is greater than background threshold and there has been some time after the previous switch then you 
     # can change the object type.
@@ -510,6 +520,13 @@ while(1):
             switch = 'Eraser'
         else:
             switch = 'Pen'
+
+    if cap1_thresh > background_threshold and (time.time() - last_switch) > 1:
+        cap1 = True
+
+    if cap2_thresh > background_threshold and (time.time() - last_switch) > 1:
+        cap2 = True
+
 
     # Convert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -585,6 +602,9 @@ while(1):
     else:
         frame[0: 50, 0: 50] = pen_img
 
+    frame[0: 50, 150: 200] = cam1_img
+    frame[0: 50, 300: 350] = cam2_img
+
     cv2.imshow('image',frame)
 
     ## 디버깅 용도
@@ -596,16 +616,16 @@ while(1):
     if k == 27:
         break
 
-    ## 캡쳐부분
-    elif k == ord('s'):
-        print("화면 캡쳐")
-        # cv2.imwrite("F:\YOLO\newTech\fingerDraw" + "test" + ".png", frame)
-        cv2.imwrite("Cam Test.png", frame)
-
-    elif k == ord('d'):
-        print("그림판 캡쳐")
-        # cv2.imwrite("F:\YOLO\newTech\fingerDraw" + "test" + ".png", frame)
-        cv2.imwrite("Paint Test.png", canvas)
+    # #키보드 캡쳐부분
+    # elif k == ord('s'):
+    #     print("화면 캡쳐")
+    #     # cv2.imwrite("F:\YOLO\newTech\fingerDraw" + "test" + ".png", frame)
+    #     cv2.imwrite("Cam Test.png", frame)
+    #
+    # elif k == ord('d'):
+    #     print("그림판 캡쳐")
+    #     # cv2.imwrite("F:\YOLO\newTech\fingerDraw" + "test" + ".png", frame)
+    #     cv2.imwrite("Paint Test.png", canvas)
     
     # Clear the canvas after 1 second, if the clear variable is true
     if clear == True:
@@ -615,6 +635,16 @@ while(1):
         
         # And then set clear to false
         clear = False
+
+    if cap1 == True:
+        print("화면 캡쳐")
+        cv2.imwrite("Cam Test.png", frame)
+        cap1 = False
+
+    if cap2 == True:
+        print("그림판 캡쳐")
+        cv2.imwrite("Paint Test.png", canvas)
+        cap2 = False
         
 cv2.destroyAllWindows()
 cap.release()
