@@ -4,3 +4,4 @@ newTech/faceDetection/*
 !newTech/faceDetection/*.cpp
 
 newTech/fingerDraw/venv/
+newTech/fingerDraw/.idea/
