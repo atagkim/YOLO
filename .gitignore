@@ -1,3 +1,6 @@
 newTech/opencv/
+
 newTech/faceDetection/*
 !newTech/faceDetection/*.cpp
+
+newTech/fingerDraw/venv/
