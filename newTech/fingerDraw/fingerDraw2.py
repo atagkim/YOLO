@@ -492,6 +492,8 @@ cap2 = False
 
 pen_color = [255,0,0]
 
+draw_delay = False
+
 while(1):
     _, frame = cap.read()
     frame = cv2.flip(frame, 1 )
@@ -544,6 +546,8 @@ while(1):
             pen_color[0] = 255
             pen_color[2] = 0
 
+        draw_delay = True
+
 
     # Convert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -585,8 +589,11 @@ while(1):
             
             if switch == 'Pen':
                 # Draw the line on the canvas
+                if draw_delay == True:
+                    draw_delay = False
+                    time.sleep(1)
                 canvas = cv2.line(canvas, (x1,y1), (x2,y2), pen_color, 5)
-                
+
             else:
                 cv2.circle(canvas, (x2, y2), 20, (0,0,0), -1)
             
@@ -597,8 +604,9 @@ while(1):
         
         # Now if the area is greater than the wiper threshold then set the clear variable to True
         if area > wiper_thresh:
-           cv2.putText(canvas,'Clearing Canvas',(0,200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255), 1, cv2.LINE_AA)
-           clear = True 
+            cv2.putText(canvas,'Clearing Canvas',(0,200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255), 1, cv2.LINE_AA)
+            clear = True
+
 
     else:
         # If there were no contours detected then make x1,y1 = 0
@@ -653,6 +661,7 @@ while(1):
         
         # And then set clear to false
         clear = False
+        draw_delay = True
 
     if cap1 == True:
         time.sleep(1)
