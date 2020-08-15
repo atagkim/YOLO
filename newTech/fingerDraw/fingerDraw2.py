@@ -468,7 +468,7 @@ canvas = None
 backgroundobject = cv2.createBackgroundSubtractorMOG2( detectShadows = False )
 
 # This threshold determines the amount of disruption in background.
-background_threshold = 600
+background_threshold = 400
 
 # A variable which tells you if you're using a pen or an eraser.
 switch = 'Pen'
@@ -489,6 +489,7 @@ wiper_thresh = 40000
 clear = False
 cap1 = False
 cap2 = False
+change_color = False
 
 pen_color = [255,0,0]
 
@@ -512,7 +513,7 @@ while(1):
     fgmask_cap2 = backgroundobject.apply(top_left_cap2)
     fgmask_change_color = backgroundobject.apply(top_left_change_color)
     
-    # Note the number of pixels that are white, this is the level of disruption.
+    # Note the number of pixels that  are white,this is the level of disruption.
     switch_thresh = np.sum(fgmask==255)
     cap1_thresh = np.sum(fgmask_cap1==255)
     cap2_thresh = np.sum(fgmask_cap2==255)
@@ -537,16 +538,7 @@ while(1):
         cap2 = True
 
     if change_color_thresh > background_threshold and (time.time() - last_switch) > 1:
-        time.sleep(1)
-        print('펜 컬러 변경')
-        if pen_color[0] and 255:
-            pen_color[0] = 0
-            pen_color[2] = 255
-        else:
-            pen_color[0] = 255
-            pen_color[2] = 0
-
-        draw_delay = True
+        change_color = True
 
 
     # Convert BGR to HSV
@@ -581,17 +573,20 @@ while(1):
         # Get the area of the contour
         area = cv2.contourArea(c)
         
-        # If there were no previous points then save the detected x2,y2 coordinates as x1,y1. 
+        # If there were no previous points then save the detected x2,y2 coordinates as x1,y1.
         if x1 == 0 and y1 == 0:
             x1,y1= x2,y2
-            
+
         else:
             
             if switch == 'Pen':
                 # Draw the line on the canvas
                 if draw_delay == True:
                     draw_delay = False
+
                     time.sleep(1)
+                    x1, y1 = x2, y2
+
                 canvas = cv2.line(canvas, (x1,y1), (x2,y2), pen_color, 5)
 
             else:
@@ -656,24 +651,44 @@ while(1):
     # Clear the canvas after 1 second, if the clear variable is true
     if clear == True:
         
-        time.sleep(1)
+        time.sleep(0.5)
         canvas = None
         
         # And then set clear to false
         clear = False
+
         draw_delay = True
 
     if cap1 == True:
-        time.sleep(1)
+        time.sleep(0.5)
         print("화면 캡쳐")
         cv2.imwrite("Cam Test.png", frame)
         cap1 = False
 
+        draw_delay = True
+
     if cap2 == True:
-        time.sleep(1)
+        time.sleep(0.5)
         print("그림판 캡쳐")
         cv2.imwrite("Paint Test.png", canvas)
         cap2 = False
+
+        draw_delay = True
+
+    if change_color == True:
+        change_color = False
+
+        time.sleep(1)
+        print('펜 컬러 변경')
+
+        if pen_color[0] and 255:
+            pen_color[0] = 0
+            pen_color[2] = 255
+        else:
+            pen_color[0] = 255
+            pen_color[2] = 0
+
+        draw_delay = True
 
 
 
