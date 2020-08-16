@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import time
-
+import keyboard
 
 # # step1
 # # A required callback method that goes into the trackbar function.
@@ -439,24 +439,23 @@ import time
 # cv2.destroyAllWindows()
 # cap.release()
 
-#step6
+# step6
 load_from_disk = False
 if load_from_disk:
     penval = np.load('penval.npy')
 
 cap = cv2.VideoCapture(0)
-cap.set(3,1280)
-cap.set(4,720)
+cap.set(3, 1280)
+cap.set(4, 720)
 
 # Load these 2 images and resize them to the same size.
-pen_img = cv2.resize(cv2.imread('pen.png',1), (50, 50))
-eraser_img = cv2.resize(cv2.imread('eraser.jpg',1), (50, 50))
-cam1_img = cv2.resize(cv2.imread('camera1.png',1), (50, 50))
-cam2_img = cv2.resize(cv2.imread('camera2.png',1), (50, 50))
-change_color_img = cv2.resize(cv2.imread('change_color_img.png',1), (50, 50))
+pen_img = cv2.resize(cv2.imread('pen.png', 1), (50, 50))
+eraser_img = cv2.resize(cv2.imread('eraser.jpg', 1), (50, 50))
+cam1_img = cv2.resize(cv2.imread('camera1.png', 1), (50, 50))
+cam2_img = cv2.resize(cv2.imread('camera2.png', 1), (50, 50))
+change_color_img = cv2.resize(cv2.imread('change_color_img.png', 1), (50, 50))
 
-
-kernel = np.ones((5,5),np.uint8)
+kernel = np.ones((5, 5), np.uint8)
 
 # Making window size adjustable
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
@@ -465,10 +464,10 @@ cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 canvas = None
 
 # Create a background subtractor Object
-backgroundobject = cv2.createBackgroundSubtractorMOG2( detectShadows = False )
+backgroundobject = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
 
 # This threshold determines the amount of disruption in background.
-background_threshold = 600
+background_threshold = 400
 
 # A variable which tells you if you're using a pen or an eraser.
 switch = 'Pen'
@@ -477,7 +476,7 @@ switch = 'Pen'
 last_switch = time.time()
 
 # Initilize x1,y1 points
-x1,y1=0,0
+x1, y1 = 0, 0
 
 # Threshold for noise
 noiseth = 800
@@ -490,19 +489,21 @@ clear = False
 cap1 = False
 cap2 = False
 
-pen_color = [255,0,0]
+pen_color = [255, 0, 0]
 
 draw_delay = False
 
-while(1):
+draw_chk = False
+
+while (1):
     _, frame = cap.read()
-    frame = cv2.flip(frame, 1 )
-    
+    frame = cv2.flip(frame, 1)
+
     # Initilize the canvas as a black image
     if canvas is None:
         canvas = np.zeros_like(frame)
-        
-    # Take the top left of the frame and apply the background subtractor there    
+
+    # Take the top left of the frame and apply the background subtractor there
     top_left = frame[0: 50, 0: 50]
     top_left_cap1 = frame[0: 50, 150: 200]
     top_left_cap2 = frame[0: 50, 300: 350]
@@ -511,20 +512,20 @@ while(1):
     fgmask_cap1 = backgroundobject.apply(top_left_cap1)
     fgmask_cap2 = backgroundobject.apply(top_left_cap2)
     fgmask_change_color = backgroundobject.apply(top_left_change_color)
-    
-    # Note the number of pixels that are white, this is the level of disruption.
-    switch_thresh = np.sum(fgmask==255)
-    cap1_thresh = np.sum(fgmask_cap1==255)
-    cap2_thresh = np.sum(fgmask_cap2==255)
-    change_color_thresh = np.sum(fgmask_change_color==255)
 
-    # If the disruption is greater than background threshold and there has been some time after the previous switch then you 
+    # Note the number of pixels that  are white,this is the level of disruption.
+    switch_thresh = np.sum(fgmask == 255)
+    cap1_thresh = np.sum(fgmask_cap1 == 255)
+    cap2_thresh = np.sum(fgmask_cap2 == 255)
+    change_color_thresh = np.sum(fgmask_change_color == 255)
+
+    # If the disruption is greater than background threshold and there has been some time after the previous switch then you
     # can change the object type.
-    if switch_thresh > background_threshold  and (time.time() - last_switch) > 1:
-        
-        # Save the time of the switch. 
+    if switch_thresh > background_threshold and (time.time() - last_switch) > 1:
+
+        # Save the time of the switch.
         last_switch = time.time()
-        
+
         if switch == 'Pen':
             switch = 'Eraser'
         else:
@@ -537,7 +538,6 @@ while(1):
         cap2 = True
 
     if change_color_thresh > background_threshold and (time.time() - last_switch) > 1:
-        time.sleep(1)
         print('펜 컬러 변경')
         if pen_color[0] and 255:
             pen_color[0] = 0
@@ -548,81 +548,81 @@ while(1):
 
         draw_delay = True
 
-
     # Convert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    
+
     # If you're reading from memory then load the upper and lower ranges from there
     if load_from_disk:
-            lower_range = penval[0]
-            upper_range = penval[1]
-            
+        lower_range = penval[0]
+        upper_range = penval[1]
+
     # Otherwise define your own custom values for upper and lower range.
     else:
-        lower_range  = np.array([20,60,75])
+        lower_range = np.array([20, 60, 75])
         # lower_range = np.array([55, 40, 0])
-        upper_range = np.array([65,255,255])
-    
+        upper_range = np.array([65, 255, 255])
+
     mask = cv2.inRange(hsv, lower_range, upper_range)
-    
+
     # Perform morphological operations to get rid of the noise
-    mask = cv2.erode(mask,kernel,iterations = 1)
-    mask = cv2.dilate(mask,kernel,iterations = 2)
-    
+    mask = cv2.erode(mask, kernel, iterations=1)
+    mask = cv2.dilate(mask, kernel, iterations=2)
+
     # Find Contours
-    contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-    
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
     # Make sure there is a contour present and also its size is bigger than noise threshold.
-    if contours and cv2.contourArea(max(contours, key = cv2.contourArea)) > noiseth:
-                
-        c = max(contours, key = cv2.contourArea)    
-        x2,y2,w,h = cv2.boundingRect(c)
-        
+    if contours and cv2.contourArea(max(contours, key=cv2.contourArea)) > noiseth:
+
+        c = max(contours, key=cv2.contourArea)
+        x2, y2, w, h = cv2.boundingRect(c)
+
         # Get the area of the contour
         area = cv2.contourArea(c)
-        
-        # If there were no previous points then save the detected x2,y2 coordinates as x1,y1. 
+
+        # If there were no previous points then save the detected x2,y2 coordinates as x1,y1.
         if x1 == 0 and y1 == 0:
-            x1,y1= x2,y2
-            
+            x1, y1 = x2, y2
+
+        elif draw_delay == True:
+            time.sleep(1)
+
+            x1, y1 = x2, y2
+            draw_delay = False
+
+
         else:
-            
+
             if switch == 'Pen':
                 # Draw the line on the canvas
-                if draw_delay == True:
-                    draw_delay = False
-                    time.sleep(1)
-                canvas = cv2.line(canvas, (x1,y1), (x2,y2), pen_color, 5)
+                if keyboard.is_pressed(' '):
+                    canvas = cv2.line(canvas, (x1, y1), (x2, y2), pen_color, 5)
 
             else:
-                cv2.circle(canvas, (x2, y2), 20, (0,0,0), -1)
-            
-            
-        
+                cv2.circle(canvas, (x2, y2), 20, (0, 0, 0), -1)
+
         # After the line is drawn the new points become the previous points.
-        x1,y1= x2,y2
-        
+        x1, y1 = x2, y2
+
         # Now if the area is greater than the wiper threshold then set the clear variable to True
         if area > wiper_thresh:
-            cv2.putText(canvas,'Clearing Canvas',(0,200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255), 1, cv2.LINE_AA)
+            cv2.putText(canvas, 'Clearing Canvas', (0, 200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1, cv2.LINE_AA)
             clear = True
 
 
     else:
         # If there were no contours detected then make x1,y1 = 0
-        x1,y1 =0,0
-    
-   
+        x1, y1 = 0, 0
+
     # Now this piece of code is just for smooth drawing. (Optional)
     _, mask = cv2.threshold(cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY), 20, 255, cv2.THRESH_BINARY)
-    foreground = cv2.bitwise_and(canvas, canvas, mask = mask)
-    background = cv2.bitwise_and(frame, frame, mask = cv2.bitwise_not(mask))
-    frame = cv2.add(foreground,background)
+    foreground = cv2.bitwise_and(canvas, canvas, mask=mask)
+    background = cv2.bitwise_and(frame, frame, mask=cv2.bitwise_not(mask))
+    frame = cv2.add(foreground, background)
 
-    
     # Switch the images depending upon what we're using, pen or eraser.
     if switch != 'Pen':
-        cv2.circle(frame, (x1, y1), 20, (255,255,255), -1)
+        cv2.circle(frame, (x1, y1), 20, (255, 255, 255), -1)
         frame[0: 50, 0: 50] = eraser_img
     else:
         frame[0: 50, 0: 50] = pen_img
@@ -631,12 +631,12 @@ while(1):
     frame[0: 50, 300: 350] = cam2_img
     frame[0: 50, 450: 500] = change_color_img
 
-    cv2.imshow('image',frame)
+    cv2.imshow('image', frame)
 
     ## 디버깅 용도
     # Optionally stack both frames and show it.
-    #stacked = np.hstack((canvas, frame))
-    #cv2.imshow('Trackbars', cv2.resize(stacked, None, fx=0.6, fy=0.6))
+    # stacked = np.hstack((canvas, frame))
+    # cv2.imshow('Trackbars', cv2.resize(stacked, None, fx=0.6, fy=0.6))
 
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
@@ -652,30 +652,32 @@ while(1):
     #     print("그림판 캡쳐")
     #     # cv2.imwrite("F:\YOLO\newTech\fingerDraw" + "test" + ".png", frame)
     #     cv2.imwrite("Paint Test.png", canvas)
-    
+
     # Clear the canvas after 1 second, if the clear variable is true
     if clear == True:
-        
-        time.sleep(1)
+        time.sleep(0.5)
         canvas = None
-        
+
         # And then set clear to false
         clear = False
+
         draw_delay = True
 
     if cap1 == True:
-        time.sleep(1)
+        time.sleep(0.5)
         print("화면 캡쳐")
         cv2.imwrite("Cam Test.png", frame)
         cap1 = False
 
+        draw_delay = True
+
     if cap2 == True:
-        time.sleep(1)
+        time.sleep(0.5)
         print("그림판 캡쳐")
         cv2.imwrite("Paint Test.png", canvas)
         cap2 = False
 
-
+        draw_delay = True
 
 cv2.destroyAllWindows()
 cap.release()
