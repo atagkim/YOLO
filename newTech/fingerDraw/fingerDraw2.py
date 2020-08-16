@@ -488,6 +488,7 @@ wiper_thresh = 40000
 clear = False
 cap1 = False
 cap2 = False
+change_color = False
 
 pen_color = [255, 0, 0]
 
@@ -512,12 +513,12 @@ while (1):
     fgmask_cap1 = backgroundobject.apply(top_left_cap1)
     fgmask_cap2 = backgroundobject.apply(top_left_cap2)
     fgmask_change_color = backgroundobject.apply(top_left_change_color)
-
+    
     # Note the number of pixels that  are white,this is the level of disruption.
-    switch_thresh = np.sum(fgmask == 255)
-    cap1_thresh = np.sum(fgmask_cap1 == 255)
-    cap2_thresh = np.sum(fgmask_cap2 == 255)
-    change_color_thresh = np.sum(fgmask_change_color == 255)
+    switch_thresh = np.sum(fgmask==255)
+    cap1_thresh = np.sum(fgmask_cap1==255)
+    cap2_thresh = np.sum(fgmask_cap2==255)
+    change_color_thresh = np.sum(fgmask_change_color==255)
 
     # If the disruption is greater than background threshold and there has been some time after the previous switch then you
     # can change the object type.
@@ -538,15 +539,7 @@ while (1):
         cap2 = True
 
     if change_color_thresh > background_threshold and (time.time() - last_switch) > 1:
-        print('펜 컬러 변경')
-        if pen_color[0] and 255:
-            pen_color[0] = 0
-            pen_color[2] = 255
-        else:
-            pen_color[0] = 255
-            pen_color[2] = 0
-
-        draw_delay = True
+        change_color = True
 
     # Convert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -582,19 +575,17 @@ while (1):
 
         # If there were no previous points then save the detected x2,y2 coordinates as x1,y1.
         if x1 == 0 and y1 == 0:
-            x1, y1 = x2, y2
-
-        elif draw_delay == True:
-            time.sleep(1)
-
-            x1, y1 = x2, y2
-            draw_delay = False
-
+            x1,y1= x2,y2
 
         else:
 
             if switch == 'Pen':
                 # Draw the line on the canvas
+                if draw_delay == True:
+                    draw_delay = False
+
+                    time.sleep(1)
+                    x1, y1 = x2, y2
                 if keyboard.is_pressed(' '):
                     canvas = cv2.line(canvas, (x1, y1), (x2, y2), pen_color, 5)
 
@@ -655,6 +646,7 @@ while (1):
 
     # Clear the canvas after 1 second, if the clear variable is true
     if clear == True:
+
         time.sleep(0.5)
         canvas = None
 
@@ -678,6 +670,22 @@ while (1):
         cap2 = False
 
         draw_delay = True
+
+    if change_color == True:
+        change_color = False
+
+        time.sleep(1)
+        print('펜 컬러 변경')
+
+        if pen_color[0] and 255:
+            pen_color[0] = 0
+            pen_color[2] = 255
+        else:
+            pen_color[0] = 255
+            pen_color[2] = 0
+
+        draw_delay = True
+
 
 cv2.destroyAllWindows()
 cap.release()
