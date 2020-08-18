@@ -95,12 +95,11 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 
+
+
+
+
 '''
-
-
-
-
-
 
 
 
@@ -507,6 +506,7 @@ change_font_size = False
 
 font_color = [255, 0, 0]
 font_size = 5
+font_size_erase = 20
 
 draw_delay = False
 draw_chk = False
@@ -614,7 +614,7 @@ while (1):
                     canvas = cv2.line(canvas, (x1, y1), (x2, y2), font_color, font_size)
 
             else:
-                cv2.circle(canvas, (x2, y2), 20, (0, 0, 0), -1)
+                cv2.circle(canvas, (x2, y2), font_size_erase, (0, 0, 0), -1)
 
         # After the line is drawn the new points become the previous points.
         x1, y1 = x2, y2
@@ -637,7 +637,7 @@ while (1):
 
     # Switch the images depending upon what we're using, pen or eraser.
     if switch != 'Pen':
-        cv2.circle(frame, (x1, y1), 20, (255, 255, 255), -1)
+        cv2.circle(frame, (x1, y1), font_size_erase, (255, 255, 255), -1)
         frame[0: 50, 0: 50] = eraser_img
     else:
         frame[0: 50, 0: 50] = pen_img
@@ -719,8 +719,11 @@ while (1):
 
         if font_size == 5:
             font_size = 20
+            font_size_erase = 100
         else:
             font_size = 5
+            font_size_erase = 20
+
 
         draw_delay = True
 
