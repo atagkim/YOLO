@@ -576,8 +576,7 @@ while (1):
     else:
         lower_range = np.array([30, 80, 110])
         #lower_range = np.array([55, 40, 0])
-        upper_range = np.array([50, 200, 200]
-                               )
+        upper_range = np.array([50, 200, 200])
 
     mask = cv2.inRange(hsv, lower_range, upper_range)
 
