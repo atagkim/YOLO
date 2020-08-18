@@ -3,96 +3,108 @@ import numpy as np
 import time
 import keyboard
 
-# # step1
-# # A required callback method that goes into the trackbar function.
-# def nothing(x):
-#     pass
-#
-# # Intializing the webcam feed.
-# cap = cv2.VideoCapture(0)
-# cap.set(3,1280)
-# cap.set(4,720)
-#
-# # Create a window named trackbars.
-# cv2.namedWindow("Trackbars")
-#
-# # Now create 6 tracbars that will control the lower and upper range of H,S & V channels.
-# # The Arguments are like this: Name of trackbar, window name, range, callback function.
-# # For Hue the range is 0-179 and for S,V its 0-255.
-#
-# ##
-# # H는 색상, S는 채도, V는 채도
-# # 색상은 원래 가시광선 스펙트럼 고리모양 (0도 == 360도(빨강))
-# # 채도는 진하기로 생각하면 됨
-# # 명도는 밝은 정도, 정확한 색을 100%, 검은색을 0%로 생각하면 됨
-# # OpenCV에선 H는 0~180, S,V는 0~255로 표현(8bit)
-# cv2.createTrackbar("L - H", "Trackbars", 0, 179, nothing)
-# cv2.createTrackbar("L - S", "Trackbars", 0, 255, nothing)
-# cv2.createTrackbar("L - V", "Trackbars", 0, 255, nothing)
-# cv2.createTrackbar("U - H", "Trackbars", 179, 179, nothing)
-# cv2.createTrackbar("U - S", "Trackbars", 255, 255, nothing)
-# cv2.createTrackbar("U - V", "Trackbars", 255, 255, nothing)
-#
-#
-# while True:
-#
-#     # Start reading the webcam feed frame by frame.
-#     ret, frame = cap.read()
-#     if not ret:
-#         break
-#     # Flip the frame horizontally (Not required)
-#     frame = cv2.flip( frame, 1 )
-#
-#     # Convert the BGR image to HSV image.
-#     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-#
-#     # Get the new values of the trackbar in real time as the user changes them
-#     l_h = cv2.getTrackbarPos("L - H", "Trackbars")
-#     l_s = cv2.getTrackbarPos("L - S", "Trackbars")
-#     l_v = cv2.getTrackbarPos("L - V", "Trackbars")
-#     u_h = cv2.getTrackbarPos("U - H", "Trackbars")
-#     u_s = cv2.getTrackbarPos("U - S", "Trackbars")
-#     u_v = cv2.getTrackbarPos("U - V", "Trackbars")
-#
-#     # Set the lower and upper HSV range according to the value selected by the trackbar
-#     lower_range = np.array([l_h, l_s, l_v])
-#     upper_range = np.array([u_h, u_s, u_v])
-#
-#     # Filter the image and get the binary mask, where white represents your target color
-#     mask = cv2.inRange(hsv, lower_range, upper_range)
-#
-#     # You can also visualize the real part of the target color (Optional)
-#     ## 어퍼바운드, 로어바운드 정해서 마스크 씌움(해당되는 색만 뽑기)
-#     res = cv2.bitwise_and(frame, frame, mask=mask)
-#
-#     # Converting the binary mask to 3 channel image, this is just so we can stack it with the others
-#     mask_3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-#
-#     # stack the mask, orginal frame and the filtered result
-#     stacked = np.hstack((mask_3,frame,res))
-#
-#     # Show this stacked frame at 40% of the size.
-#     cv2.imshow('Trackbars',cv2.resize(stacked,None,fx=0.4,fy=0.4))
-#
-#     # If the user presses ESC then exit the program
-#     key = cv2.waitKey(1)
-#     if key == 27:
-#         break
-#
-#     # If the user presses `s` then print this array.
-#     if key == ord('s'):
-#
-#         thearray = [[l_h,l_s,l_v],[u_h, u_s, u_v]]
-#         print(thearray)
-#
-#         # Also save this array as penval.npy
-#         np.save('penval',thearray)
-#         break
-#
-# # Release the camera & destroy the windows.
-# cap.release()
-# cv2.destroyAllWindows()
-#
+'''
+
+# step1
+# A required callback method that goes into the trackbar function.
+def nothing(x):
+    pass
+
+# Intializing the webcam feed.
+cap = cv2.VideoCapture(0)
+cap.set(3,1280)
+cap.set(4,720)
+
+# Create a window named trackbars.
+cv2.namedWindow("Trackbars")
+
+# Now create 6 tracbars that will control the lower and upper range of H,S & V channels.
+# The Arguments are like this: Name of trackbar, window name, range, callback function.
+# For Hue the range is 0-179 and for S,V its 0-255.
+
+##
+# H는 색상, S는 채도, V는 채도
+# 색상은 원래 가시광선 스펙트럼 고리모양 (0도 == 360도(빨강))
+# 채도는 진하기로 생각하면 됨
+# 명도는 밝은 정도, 정확한 색을 100%, 검은색을 0%로 생각하면 됨
+# OpenCV에선 H는 0~180, S,V는 0~255로 표현(8bit)
+cv2.createTrackbar("L - H", "Trackbars", 0, 179, nothing)
+cv2.createTrackbar("L - S", "Trackbars", 0, 255, nothing)
+cv2.createTrackbar("L - V", "Trackbars", 0, 255, nothing)
+cv2.createTrackbar("U - H", "Trackbars", 179, 179, nothing)
+cv2.createTrackbar("U - S", "Trackbars", 255, 255, nothing)
+cv2.createTrackbar("U - V", "Trackbars", 255, 255, nothing)
+
+
+while True:
+
+    # Start reading the webcam feed frame by frame.
+    ret, frame = cap.read()
+    if not ret:
+        break
+    # Flip the frame horizontally (Not required)
+    frame = cv2.flip( frame, 1 )
+
+    # Convert the BGR image to HSV image.
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # Get the new values of the trackbar in real time as the user changes them
+    l_h = cv2.getTrackbarPos("L - H", "Trackbars")
+    l_s = cv2.getTrackbarPos("L - S", "Trackbars")
+    l_v = cv2.getTrackbarPos("L - V", "Trackbars")
+    u_h = cv2.getTrackbarPos("U - H", "Trackbars")
+    u_s = cv2.getTrackbarPos("U - S", "Trackbars")
+    u_v = cv2.getTrackbarPos("U - V", "Trackbars")
+
+    # Set the lower and upper HSV range according to the value selected by the trackbar
+    lower_range = np.array([l_h, l_s, l_v])
+    upper_range = np.array([u_h, u_s, u_v])
+
+    # Filter the image and get the binary mask, where white represents your target color
+    mask = cv2.inRange(hsv, lower_range, upper_range)
+
+    # You can also visualize the real part of the target color (Optional)
+    ## 어퍼바운드, 로어바운드 정해서 마스크 씌움(해당되는 색만 뽑기)
+    res = cv2.bitwise_and(frame, frame, mask=mask)
+
+    # Converting the binary mask to 3 channel image, this is just so we can stack it with the others
+    mask_3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+
+    # stack the mask, orginal frame and the filtered result
+    stacked = np.hstack((mask_3,frame,res))
+
+    # Show this stacked frame at 40% of the size.
+    cv2.imshow('Trackbars',cv2.resize(stacked,None,fx=0.4,fy=0.4))
+
+    # If the user presses ESC then exit the program
+    key = cv2.waitKey(1)
+    if key == 27:
+        break
+
+    # If the user presses `s` then print this array.
+    if key == ord('s'):
+
+        thearray = [[l_h,l_s,l_v],[u_h, u_s, u_v]]
+        print(thearray)
+
+        # Also save this array as penval.npy
+        np.save('penval',thearray)
+        break
+
+# Release the camera & destroy the windows.
+cap.release()
+cv2.destroyAllWindows()
+
+'''
+
+
+
+
+
+
+
+
+
 #
 # # This variable determines if we want to load color range from memory or use the ones defined here.
 # load_from_disk = True
@@ -440,7 +452,7 @@ import keyboard
 # cap.release()
 
 # step6
-load_from_disk = False
+load_from_disk = True
 if load_from_disk:
     penval = np.load('penval.npy')
 
@@ -454,6 +466,8 @@ eraser_img = cv2.resize(cv2.imread('eraser.jpg', 1), (50, 50))
 cam1_img = cv2.resize(cv2.imread('camera1.png', 1), (50, 50))
 cam2_img = cv2.resize(cv2.imread('camera2.png', 1), (50, 50))
 change_color_img = cv2.resize(cv2.imread('change_color_img.png', 1), (50, 50))
+font_size_img = cv2.resize(cv2.imread('font_size.png', 1), (50, 50))
+
 
 kernel = np.ones((5, 5), np.uint8)
 
@@ -489,11 +503,12 @@ clear = False
 cap1 = False
 cap2 = False
 change_color = False
+change_font_size = False
 
-pen_color = [255, 0, 0]
+font_color = [255, 0, 0]
+font_size = 5
 
 draw_delay = False
-
 draw_chk = False
 
 while (1):
@@ -509,16 +524,20 @@ while (1):
     top_left_cap1 = frame[0: 50, 150: 200]
     top_left_cap2 = frame[0: 50, 300: 350]
     top_left_change_color = frame[0: 50, 450: 500]
+    top_left_change_font_size = frame[0: 50, 600: 650]
+
     fgmask = backgroundobject.apply(top_left)
     fgmask_cap1 = backgroundobject.apply(top_left_cap1)
     fgmask_cap2 = backgroundobject.apply(top_left_cap2)
     fgmask_change_color = backgroundobject.apply(top_left_change_color)
-    
+    fgmask_change_font_size = backgroundobject.apply(top_left_change_font_size)
+
     # Note the number of pixels that  are white,this is the level of disruption.
     switch_thresh = np.sum(fgmask==255)
     cap1_thresh = np.sum(fgmask_cap1==255)
     cap2_thresh = np.sum(fgmask_cap2==255)
     change_color_thresh = np.sum(fgmask_change_color==255)
+    font_size_thresh = np.sum(fgmask_change_font_size==255)
 
     # If the disruption is greater than background threshold and there has been some time after the previous switch then you
     # can change the object type.
@@ -541,6 +560,10 @@ while (1):
     if change_color_thresh > background_threshold and (time.time() - last_switch) > 1:
         change_color = True
 
+    if font_size_thresh > background_threshold and (time.time() - last_switch) > 1:
+        change_font_size = True
+
+
     # Convert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -551,9 +574,10 @@ while (1):
 
     # Otherwise define your own custom values for upper and lower range.
     else:
-        lower_range = np.array([20, 60, 75])
-        # lower_range = np.array([55, 40, 0])
-        upper_range = np.array([65, 255, 255])
+        lower_range = np.array([30, 80, 110])
+        #lower_range = np.array([55, 40, 0])
+        upper_range = np.array([50, 200, 200]
+                               )
 
     mask = cv2.inRange(hsv, lower_range, upper_range)
 
@@ -587,7 +611,7 @@ while (1):
                     time.sleep(1)
                     x1, y1 = x2, y2
                 if keyboard.is_pressed(' '):
-                    canvas = cv2.line(canvas, (x1, y1), (x2, y2), pen_color, 5)
+                    canvas = cv2.line(canvas, (x1, y1), (x2, y2), font_color, font_size)
 
             else:
                 cv2.circle(canvas, (x2, y2), 20, (0, 0, 0), -1)
@@ -621,6 +645,7 @@ while (1):
     frame[0: 50, 150: 200] = cam1_img
     frame[0: 50, 300: 350] = cam2_img
     frame[0: 50, 450: 500] = change_color_img
+    frame[0: 50, 600: 650] = font_size_img
 
     cv2.imshow('image', frame)
 
@@ -677,12 +702,25 @@ while (1):
         time.sleep(1)
         print('펜 컬러 변경')
 
-        if pen_color[0] and 255:
-            pen_color[0] = 0
-            pen_color[2] = 255
+        if font_color[0] and 255:
+            font_color[0] = 0
+            font_color[2] = 255
         else:
-            pen_color[0] = 255
-            pen_color[2] = 0
+            font_color[0] = 255
+            font_color[2] = 0
+
+        draw_delay = True
+
+    if change_font_size == True:
+        change_font_size = False
+
+        time.sleep(0.5)
+        print('폰트 사이즈 변경')
+
+        if font_size == 5:
+            font_size = 20
+        else:
+            font_size = 5
 
         draw_delay = True
 
