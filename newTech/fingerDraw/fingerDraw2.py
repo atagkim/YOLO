@@ -670,6 +670,7 @@ while (1):
             canvas = cv2.add(canvas, tmpcanvas)
             v_chk=False
             cutcanvas = None
+            tmpcanvas = None
             cutchk = False
 
     # Switch the images depending upon what we're using, pen or eraser.
