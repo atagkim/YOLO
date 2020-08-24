@@ -3,8 +3,8 @@ import numpy as np
 import time
 import keyboard
 
-'''
 
+'''
 # step1
 # A required callback method that goes into the trackbar function.
 def nothing(x):
@@ -94,12 +94,12 @@ while True:
 # Release the camera & destroy the windows.
 cap.release()
 cv2.destroyAllWindows()
-
-
-
-
-
 '''
+
+
+
+
+
 
 
 
@@ -491,6 +491,18 @@ last_switch = time.time()
 # Initilize x1,y1 points
 x1, y1 = 0, 0
 
+#잘라내기 좌표
+cutchk = False
+cutcanvas = None
+tmpcanvas = None
+stx = 0
+sty = 0
+edx = 0
+edy = 0
+cutw = 0
+cuth = 0
+v_chk=False
+
 # Threshold for noise
 noiseth = 800
 
@@ -518,6 +530,9 @@ while (1):
     # Initilize the canvas as a black image
     if canvas is None:
         canvas = np.zeros_like(frame)
+
+    if cutcanvas is None:
+        cutcanvas = np.zeros_like(frame)
 
     # Take the top left of the frame and apply the background subtractor there
     top_left = frame[0: 50, 0: 50]
@@ -633,6 +648,29 @@ while (1):
     foreground = cv2.bitwise_and(canvas, canvas, mask=mask)
     background = cv2.bitwise_and(frame, frame, mask=cv2.bitwise_not(mask))
     frame = cv2.add(foreground, background)
+    if cutchk == True:
+        cutx = edx - stx
+        cuty = edy - sty
+        if tmpcanvas is None:
+            tmpcanvas = np.zeros_like(frame)
+        for i in range(0,cuty):
+            for j in range(0,cutx):
+                if y2+i >= 720 or x2+j >= 1280:
+                    continue
+                tmpcanvas[y2+i][x2+j] = cutcanvas[sty+i][stx+j]
+
+        frame = cv2.add(frame, tmpcanvas)
+        if v_chk==False:
+            for i in range(0,cuty):
+                for j in range(0,cutx):
+                    if y2+i >= 720 or x2+j >= 1280:
+                        continue
+                    tmpcanvas[y2+i][x2+j] = 0
+        else:
+            canvas = cv2.add(canvas, tmpcanvas)
+            v_chk=False
+            cutcanvas = None
+            cutchk = False
 
     # Switch the images depending upon what we're using, pen or eraser.
     if switch != 'Pen':
@@ -653,9 +691,24 @@ while (1):
     # stacked = np.hstack((canvas, frame))
     # cv2.imshow('Trackbars', cv2.resize(stacked, None, fx=0.6, fy=0.6))
 
+
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break
+
+    #잘라내기
+    elif k == ord('x'):
+        stx, sty = x2, y2
+
+    elif k == ord('c'):
+        edx, edy = x2, y2
+        cutcanvas[sty:edy,stx:edx] = canvas[sty:edy,stx:edx]
+        canvas[sty:edy,stx:edx] = 0
+        cutchk = True
+
+    elif k == ord('v'):
+        #잘라내기 구현
+        v_chk = True
 
     # #키보드 캡쳐부분
     # elif k == ord('s'):
