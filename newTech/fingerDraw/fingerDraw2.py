@@ -4,7 +4,7 @@ import time
 import keyboard
 
 
-
+'''
 # step1
 # A required callback method that goes into the trackbar function.
 def nothing(x):
@@ -97,7 +97,7 @@ cv2.destroyAllWindows()
 
 
 
-
+'''
 
 
 
@@ -461,8 +461,7 @@ cap.set(4, 720)
 # Load these 2 images and resize them to the same size.
 pen_img = cv2.resize(cv2.imread('pen.png', 1), (50, 50))
 eraser_img = cv2.resize(cv2.imread('eraser.jpg', 1), (50, 50))
-cam1_img = cv2.resize(cv2.imread('camera1.png', 1), (50, 50))
-cam2_img = cv2.resize(cv2.imread('camera2.png', 1), (50, 50))
+paint_cap_img = cv2.resize(cv2.imread('camera1.png', 1), (50, 50))
 change_color_img = cv2.resize(cv2.imread('change_color_img.png', 1), (50, 50))
 font_size_img = cv2.resize(cv2.imread('font_size.png', 1), (50, 50))
 
@@ -510,8 +509,7 @@ wiper_thresh = 40000
 
 # A varaible which tells when to clear canvas
 clear = False
-cap1 = False
-cap2 = False
+paint_cap = False
 change_color = False
 change_font_size = False
 
@@ -521,6 +519,8 @@ font_size_erase = 20
 
 draw_delay = False
 draw_chk = False
+
+cnt=0
 
 while (1):
     _, frame = cap.read()
@@ -535,21 +535,18 @@ while (1):
 
     # Take the top left of the frame and apply the background subtractor there
     top_left = frame[0: 50, 0: 50]
-    top_left_cap1 = frame[0: 50, 150: 200]
-    top_left_cap2 = frame[0: 50, 300: 350]
-    top_left_change_color = frame[0: 50, 450: 500]
-    top_left_change_font_size = frame[0: 50, 600: 650]
+    top_left_paint_cap = frame[0: 50, 150: 200]
+    top_left_change_color = frame[0: 50, 300: 350]
+    top_left_change_font_size = frame[0: 50, 450: 500]
 
     fgmask = backgroundobject.apply(top_left)
-    fgmask_cap1 = backgroundobject.apply(top_left_cap1)
-    fgmask_cap2 = backgroundobject.apply(top_left_cap2)
+    fgmask_paint_cap = backgroundobject.apply(top_left_paint_cap)
     fgmask_change_color = backgroundobject.apply(top_left_change_color)
     fgmask_change_font_size = backgroundobject.apply(top_left_change_font_size)
 
     # Note the number of pixels that  are white,this is the level of disruption.
     switch_thresh = np.sum(fgmask==255)
-    cap1_thresh = np.sum(fgmask_cap1==255)
-    cap2_thresh = np.sum(fgmask_cap2==255)
+    paint_cap_thresh = np.sum(fgmask_paint_cap==255)
     change_color_thresh = np.sum(fgmask_change_color==255)
     font_size_thresh = np.sum(fgmask_change_font_size==255)
 
@@ -565,11 +562,8 @@ while (1):
         else:
             switch = 'Pen'
 
-    if cap1_thresh > background_threshold and (time.time() - last_switch) > 1:
-        cap1 = True
-
-    if cap2_thresh > background_threshold and (time.time() - last_switch) > 1:
-        cap2 = True
+    if paint_cap_thresh > background_threshold and (time.time() - last_switch) > 1:
+        paint_cap = True
 
     if change_color_thresh > background_threshold and (time.time() - last_switch) > 1:
         change_color = True
@@ -679,10 +673,9 @@ while (1):
     else:
         frame[0: 50, 0: 50] = pen_img
 
-    frame[0: 50, 150: 200] = cam1_img
-    frame[0: 50, 300: 350] = cam2_img
-    frame[0: 50, 450: 500] = change_color_img
-    frame[0: 50, 600: 650] = font_size_img
+    frame[0: 50, 150: 200] = paint_cap_img
+    frame[0: 50, 300: 350] = change_color_img
+    frame[0: 50, 450: 500] = font_size_img
 
     cv2.imshow('image', frame)
 
@@ -732,20 +725,20 @@ while (1):
 
         draw_delay = True
 
-    if cap1 == True:
-        time.sleep(0.5)
-        print("화면 캡쳐")
-        cv2.imwrite("Cam Test.png", frame)
-        cap1 = False
+    # if paint_cap == True:
+    #     time.sleep(0.5)
+    #     print("화면 캡쳐")
+    #     cv2.imwrite("Cam Test.png", frame)
+    #     cap1 = False
+    #
+    #     draw_delay = True
 
-        draw_delay = True
-
-    if cap2 == True:
+    if paint_cap == True:
         time.sleep(0.5)
         print("그림판 캡쳐")
-        cv2.imwrite("Paint Test.png", canvas)
-        cap2 = False
-
+        cv2.imwrite("images/Paint Test{}.png".format(cnt), canvas)
+        paint_cap = False
+        cnt+=1
         draw_delay = True
 
     if change_color == True:
