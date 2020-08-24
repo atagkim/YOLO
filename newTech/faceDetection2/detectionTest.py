@@ -1,10 +1,19 @@
 import cv2
 import time
+from tkinter import messagebox
+
+import numpy as np
+
+
+def alert():
+    messagebox.showinfo("51번학생이", "수업에 집중을 하지 않고 있습니다.")
+
+canvas = None
 
 #웹캠에서 영상을 읽어온다
 cap = cv2.VideoCapture(0)
-cap.set(3, 640) #WIDTH
-cap.set(4, 480) #HEIGHT
+cap.set(3, 1280) #WIDTH
+cap.set(4, 720) #HEIGHT
 
 #얼굴 인식 캐스케이드 파일 읽는다
 face_cascade = cv2.CascadeClassifier('haarcascade_frontface.xml')
@@ -18,6 +27,7 @@ flag = 0
 while(True):
     # frame 별로 capture 한다
     ret, frame = cap.read()
+    frame = cv2.flip(frame, 1)
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -46,14 +56,16 @@ while(True):
         print("beforeTime",beforeTime)
         print("currentTime", currentTime)
 
-        if(result > 5):
-            print("이 새기 집중 안 하고 있닭!!!!")
+        if(result > 2):
+            cv2.putText(frame, '25 student no attention', (900, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 0)
+            print("집중 안하고 있닭")
 
 
     else:
         currentTime = 0
         beforeTime = 0
         flag = 0
+
 
     # 인식된 얼굴에 사각형을 출력한다
     for (x,y,w,h) in faces:
