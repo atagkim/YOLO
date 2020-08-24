@@ -14,6 +14,7 @@ currentTime = 0
 result = 0
 flag = 0
 
+
 while(True):
     # frame 별로 capture 한다
     ret, frame = cap.read()
@@ -32,6 +33,7 @@ while(True):
         if(flag == 0):
             flag = 1
             beforeTime = rtm.tm_sec
+            currentTime = beforeTime
 
         else:
             currentTime = rtm.tm_sec
@@ -46,6 +48,7 @@ while(True):
 
         if(result > 5):
             print("이 새기 집중 안 하고 있닭!!!!")
+
 
     else:
         currentTime = 0
