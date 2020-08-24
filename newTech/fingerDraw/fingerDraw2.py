@@ -4,7 +4,7 @@ import time
 import keyboard
 
 
-'''
+
 # step1
 # A required callback method that goes into the trackbar function.
 def nothing(x):
@@ -94,7 +94,6 @@ while True:
 # Release the camera & destroy the windows.
 cap.release()
 cv2.destroyAllWindows()
-'''
 
 
 
@@ -670,6 +669,7 @@ while (1):
             canvas = cv2.add(canvas, tmpcanvas)
             v_chk=False
             cutcanvas = None
+            tmpcanvas = None
             cutchk = False
 
     # Switch the images depending upon what we're using, pen or eraser.
