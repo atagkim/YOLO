@@ -469,7 +469,7 @@ font_size_img = cv2.resize(cv2.imread('font_size.png', 1), (50, 50))
 kernel = np.ones((5, 5), np.uint8)
 
 # Making window size adjustable
-cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+cv2.namedWindow('Untacked Virtual Blackboard', cv2.WINDOW_NORMAL)
 
 # This is the canvas on which we will draw upon
 canvas = None
@@ -615,7 +615,7 @@ while (1):
                 if draw_delay == True:
                     draw_delay = False
 
-                    time.sleep(1)
+                    time.sleep(0.25)
                     x1, y1 = x2, y2
                 if keyboard.is_pressed(' '):
                     canvas = cv2.line(canvas, (x1, y1), (x2, y2), font_color, font_size)
@@ -677,7 +677,7 @@ while (1):
     frame[0: 50, 300: 350] = change_color_img
     frame[0: 50, 450: 500] = font_size_img
 
-    cv2.imshow('image', frame)
+    cv2.imshow('Untacked Virtual Blackboard', frame)
 
     ## 디버깅 용도
     # Optionally stack both frames and show it.
@@ -734,7 +734,7 @@ while (1):
     #     draw_delay = True
 
     if paint_cap == True:
-        time.sleep(0.5)
+        time.sleep(0.25)
         print("그림판 캡쳐")
         cv2.imwrite("images/Paint Test{}.png".format(cnt), canvas)
         paint_cap = False
@@ -744,7 +744,7 @@ while (1):
     if change_color == True:
         change_color = False
 
-        time.sleep(1)
+        time.sleep(0.25)
         print('펜 컬러 변경')
 
         if font_color[0] and 255:
@@ -759,7 +759,7 @@ while (1):
     if change_font_size == True:
         change_font_size = False
 
-        time.sleep(0.5)
+        time.sleep(0.25)
         print('폰트 사이즈 변경')
 
         if font_size == 5:
