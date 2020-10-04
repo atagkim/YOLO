@@ -15,3 +15,10 @@ newTech/faceDetection2/.idea/
 UntackedVirtualBlackBoard/.idea/
 UntackedVirtualBlackBoard/venv/
 UntackedVirtualBlackBoard/save/
+
+cameraCalibration/.idea/
+cameraCalibration/venv/
+cameraCalibration/__pycache__/
+
+OpenGL/.idea/
+OpenGL/venv/
