@@ -19,3 +19,6 @@ UntackedVirtualBlackBoard/save/
 cameraCalibration/.idea/
 cameraCalibration/venv/
 cameraCalibration/__pycache__/
+
+test/.idea/
+test/venv/
