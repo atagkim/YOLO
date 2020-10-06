@@ -254,13 +254,13 @@ def start_blackboard():
 
         if switch != 'Pen':
             cv2.circle(frame, (x1, y1), font_size_erase, (255, 255, 255), -1)
-            frame[0: 50, 0: 50] = eraser_img
+            frame[0:50, 0:50] = eraser_img
         else:
-            frame[0: 50, 0: 50] = pen_img
+            frame[0:50, 0:50] = pen_img
 
-        frame[0: 50, 150: 200] = paint_cap_img
-        frame[0: 50, 300: 350] = change_color_img
-        frame[0: 50, 450: 500] = change_font_size_img
+        frame[0:50, 150:200] = paint_cap_img
+        frame[0:50, 300:350] = change_color_img
+        frame[0:50, 450:500] = change_font_size_img
 
         cv2.imshow('Untacked Virtual Blackboard', frame)
 
