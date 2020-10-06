@@ -141,9 +141,9 @@ def start_blackboard():
             cutcanvas = np.zeros_like(frame)
 
         pen_or_eraser_frame = frame[0:50, 0:50]
-        paint_cap_frame = frame[150:200, 0:50]
-        change_color_frame = frame[300:350, 0:50]
-        change_font_size_frame = frame[450:500, 0:50]
+        paint_cap_frame = frame[0:50, 150:200]
+        change_color_frame = frame[0:50, 300:350]
+        change_font_size_frame = frame[0:50, 450:500]
 
         fgmask = backgroundobject.apply(pen_or_eraser_frame)
         fgmask_paint_cap = backgroundobject.apply(paint_cap_frame)
