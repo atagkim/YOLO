@@ -67,7 +67,7 @@ def initialize_HSV_values():
     return frame
 
 
-def start_blackboard(frame):
+def start_blackboard():
     load_from_disk = True
     if load_from_disk:
         penval = np.load('penval.npy')
@@ -119,10 +119,6 @@ def start_blackboard(frame):
     change_color = False
     change_font_size = False
 
-    pen_or_eraser_frame = frame[0:50, 0:50]
-    paint_cap_frame = frame[150:200, 0:50]
-    change_color_frame = frame[300:350, 0:50]
-    change_font_size_frame = frame[450:500, 0:50]
 
     font_color = [255, 0, 0]
     font_size = 5
@@ -143,6 +139,11 @@ def start_blackboard(frame):
 
         if cutcanvas is None:
             cutcanvas = np.zeros_like(frame)
+
+        pen_or_eraser_frame = frame[0:50, 0:50]
+        paint_cap_frame = frame[150:200, 0:50]
+        change_color_frame = frame[300:350, 0:50]
+        change_font_size_frame = frame[450:500, 0:50]
 
         fgmask = backgroundobject.apply(pen_or_eraser_frame)
         fgmask_paint_cap = backgroundobject.apply(paint_cap_frame)
@@ -330,8 +331,8 @@ def start_blackboard(frame):
 
 
 def main():
-    frame = initialize_HSV_values()
-    start_blackboard(frame)
+    initialize_HSV_values()
+    start_blackboard()
 
 
 if __name__ == "__main__":
