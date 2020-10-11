@@ -106,8 +106,12 @@ def start_blackboard():
     sty = 0
     edx = 0
     edy = 0
-    cutw = 0
-    cuth = 0
+    estx = 0
+    esty = 0
+    eedx = 0
+    eedy = 0
+    expchk = False
+    redchk = False
     v_chk = False
 
     noiseth = 800
@@ -252,6 +256,45 @@ def start_blackboard():
                 tmpcanvas = None
                 cutchk = False
 
+        elif expchk == True or redchk==True:
+            if tmpcanvas is None:
+                tmpcanvas = np.zeros_like(frame)
+            tmpimg = canvas[esty:eedy,estx:eedx]
+            cx = int((estx+eedx)/2)
+            cy = int((esty+eedy)/2)
+
+            if(expchk==True):
+                big = cv2.resize(tmpimg, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+                #cv2.imshow('test1', big)
+                height, width, _ = big.shape
+                height = int(height)
+                width = int(width)
+                ypoint = max(cy-int(height/2),0)
+                xpoint = max(cx-int(width/2),0)
+                suby = max(0,ypoint+height-720)
+                subx = max(0,xpoint+width-1280)
+
+                canvas[esty:eedy, estx:eedx] = 0
+                tmpcanvas[ypoint:ypoint+height-suby,xpoint:xpoint+width-subx] = big[0:height-suby,0:width-subx]
+                #cv2.imshow('test',big[0:height-suby,0:width-subx])
+                #print('{0},{1},{2},{3}'.format(suby, subx, height, width))
+
+            else:
+                small = cv2.resize(tmpimg, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)
+                height, width, _ = small.shape
+                height = int(height)
+                widht = int(width)
+                ypoint = cy-int(height/2)
+                xpoint = cx-int(widht/2)
+                canvas[esty:eedy, estx:eedx] = 0
+                tmpcanvas[ypoint:ypoint+height,xpoint:xpoint+width] = small
+
+
+            canvas = cv2.add(canvas,tmpcanvas)
+            tmpcanvas = None
+            expchk=False
+            redchk=False
+
         if switch != 'Pen':
             cv2.circle(frame, (x1, y1), font_size_erase, (255, 255, 255), -1)
             frame[0:50, 0:50] = eraser_img
@@ -279,6 +322,17 @@ def start_blackboard():
 
         elif k == ord('v'):
             v_chk = True
+
+        elif k== ord('a'):
+            estx, esty = x2, y2
+
+        elif k== ord('s'):
+            eedx, eedy = x2,y2
+
+        elif k==ord('d'):
+            expchk=True
+        elif k == ord('f'):
+            redchk = True
 
         if clear == True:
             time.sleep(0.5)
