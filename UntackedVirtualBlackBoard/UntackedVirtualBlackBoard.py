@@ -265,7 +265,6 @@ def start_blackboard():
 
             if(expchk==True):
                 big = cv2.resize(tmpimg, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-                #cv2.imshow('test1', big)
                 height, width, _ = big.shape
                 height = int(height)
                 width = int(width)
