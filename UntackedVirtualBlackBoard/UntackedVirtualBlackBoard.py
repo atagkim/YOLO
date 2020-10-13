@@ -175,7 +175,7 @@ def start_blackboard():
     # threshold 설정
     noiseth = 800
     wiper_thresh = 40000
-    background_threshold = 800 # This threshold determines the amount of disruption in background.
+    background_threshold = 400 # This threshold determines the amount of disruption in background.
 
 
     # start capturing
