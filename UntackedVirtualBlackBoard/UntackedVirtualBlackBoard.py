@@ -3,17 +3,31 @@ import numpy as np
 import time
 import keyboard
 
-
+# 콜백용으로 만들어놓은 아무것도 아닌 함수
 def nothing(x):
     pass
 
-
+# 가상 칠판에서 쓸 펜 초기값을 설정하는 함수
 def initialize_HSV_values():
+
+    # 캠 초기화
     cap = cv2.VideoCapture(0)
     cap.set(3, 1280)
     cap.set(4, 720)
+
+    # 윈도우 생성
+    windowName = "pen init"
     cv2.namedWindow("Trackbars")
 
+    # 색 설정을 위한 바 생성
+    # Now create 6 tracbars that will control the lower and upper range of H,S & V channels.
+    # The Arguments are like this: Name of trackbar, window name, range, callback function.
+    # For Hue the range is 0-179 and for S,V its 0-255.
+    # H는 색상, S는 채도, V는 채도
+    # 색상은 원래 가시광선 스펙트럼 고리모양 (0도 == 360도(빨강))
+    # 채도는 진하기로 생각하면 됨
+    # 명도는 밝은 정도, 정확한 색을 100%, 검은색을 0%로 생각하면 됨
+    # OpenCV에선 H는 0~180, S,V는 0~255로 표현(8bit) -1노-
     cv2.createTrackbar("L - H", "Trackbars", 0, 179, nothing)
     cv2.createTrackbar("L - S", "Trackbars", 0, 255, nothing)
     cv2.createTrackbar("L - V", "Trackbars", 0, 255, nothing)
@@ -21,14 +35,23 @@ def initialize_HSV_values():
     cv2.createTrackbar("U - S", "Trackbars", 255, 255, nothing)
     cv2.createTrackbar("U - V", "Trackbars", 255, 255, nothing)
 
+    # 돌아 돌아
     while True:
+
+        ## [프레임 전처리]
+        # 캠 리딩
         ret, frame = cap.read()
         if not ret:
             break
+
+        # 좌우 반전 할거면 해
         frame = cv2.flip(frame, 1)
 
+        # Convert the BGR image to HSV image.
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
+
+        # Get the new values of the trackbar in real time as the user changes them
         l_h = cv2.getTrackbarPos("L - H", "Trackbars")
         l_s = cv2.getTrackbarPos("L - S", "Trackbars")
         l_v = cv2.getTrackbarPos("L - V", "Trackbars")
@@ -36,18 +59,28 @@ def initialize_HSV_values():
         u_s = cv2.getTrackbarPos("U - S", "Trackbars")
         u_v = cv2.getTrackbarPos("U - V", "Trackbars")
 
+        # Set the lower and upper HSV range according to the value selected by the trackbar
         lower_range = np.array([l_h, l_s, l_v])
         upper_range = np.array([u_h, u_s, u_v])
 
+
+        ## [색 설정에 따른 결과값 화면 생성]
+        # 설정된 값에 인식 되는 파트만 바이너리로 마스크 따오는거
+        # Filter the image and get the binary mask, where white represents your target color
         mask = cv2.inRange(hsv, lower_range, upper_range)
 
-        res = cv2.bitwise_and(frame, frame, mask=mask)
-
+        # Converting the binary mask to 3 channel image, this is just so we can stack it with the others
         mask_3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
 
+        # You can also visualize the real part of the target color (Optional)
+        res = cv2.bitwise_and(frame, frame, mask=mask)
+
+        # 합체
         stacked = np.hstack((mask_3,frame,res))
 
+        # Show this stacked frame at 40% of the size.
         cv2.imshow('Trackbars',cv2.resize(stacked,None,fx=0.4,fy=0.4))
+
 
         key = cv2.waitKey(1)
         if key == 27:
@@ -55,6 +88,7 @@ def initialize_HSV_values():
 
         # Press 's' button to save HSV values and exit
         if key == ord('s'):
+            # 설정값 저장
             thearray = [[l_h,l_s,l_v],[u_h, u_s, u_v]]
             print(thearray)
 
@@ -68,15 +102,17 @@ def initialize_HSV_values():
 
 
 def start_blackboard():
+    # 펜 값 로딩
     load_from_disk = True
     if load_from_disk:
         penval = np.load('penval.npy')
 
+    # 캠 설정
     cap = cv2.VideoCapture(0)
     cap.set(3, 1280)
     cap.set(4, 720)
 
-    # initialize
+    # 아이콘 로딩
     pen_img = cv2.resize(cv2.imread('images/pen.png', 1), (50, 50))
     eraser_img = cv2.resize(cv2.imread('images/eraser.jpg', 1), (50, 50))
     paint_cap_img = cv2.resize(cv2.imread('images/camera1.png', 1), (50, 50))
@@ -87,16 +123,13 @@ def start_blackboard():
 
     cv2.namedWindow('Untacked Virtual Blackboard', cv2.WINDOW_NORMAL)
 
-    canvas = None
 
     backgroundobject = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
 
-    background_threshold = 400
-
     switch = 'Pen'
-
     last_switch = time.time()
 
+    canvas = None
     x1, y1 = 0, 0
 
     cutchk = False
@@ -114,22 +147,24 @@ def start_blackboard():
     redchk = False
     v_chk = False
 
-    noiseth = 800
-
-    wiper_thresh = 40000
-
     clear = False
     paint_cap = False
     change_color = False
     change_font_size = False
 
+    draw_delay = False
+    draw_chk = False
 
+    # threshold 설정
+    noiseth = 800
+    wiper_thresh = 40000
+    background_threshold = 400
+
+    # 펜 옵션
     font_color = [255, 0, 0]
     font_size = 5
     font_size_erase = 20
 
-    draw_delay = False
-    draw_chk = False
 
     cnt = 0
 
