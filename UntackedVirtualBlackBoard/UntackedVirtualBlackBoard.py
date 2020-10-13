@@ -121,17 +121,25 @@ def start_blackboard():
 
     kernel = np.ones((5, 5), np.uint8)
 
+    # Making window size adjustable
     cv2.namedWindow('Untacked Virtual Blackboard', cv2.WINDOW_NORMAL)
 
-
+    # 정적인 부분을 걸러내는거. 이유는 뭐 적당히 그런거 때문일거임
+    # Create a background subtractor Object
     backgroundobject = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
 
-    switch = 'Pen'
-    last_switch = time.time()
 
+    ## [이거저거 변수들 초기값 설정]
+    # 가장 먼저 캔버스부터
     canvas = None
+
+    # 좌표 초기화
     x1, y1 = 0, 0
 
+    switch = 'Pen'
+    last_switch = time.time() # With this variable we will monitor the time between previous switch.
+
+    # 잘라내기 좌표
     cutchk = False
     cutcanvas = None
     tmpcanvas = None
@@ -143,10 +151,12 @@ def start_blackboard():
     esty = 0
     eedx = 0
     eedy = 0
+
     expchk = False
     redchk = False
     v_chk = False
 
+    # 기능들 초기 상태
     clear = False
     paint_cap = False
     change_color = False
@@ -155,30 +165,34 @@ def start_blackboard():
     draw_delay = False
     draw_chk = False
 
-    # threshold 설정
-    noiseth = 800
-    wiper_thresh = 40000
-    background_threshold = 400
+    screenshotCnt = 0
 
-    # 펜 옵션
+    # 펜 속성
     font_color = [255, 0, 0]
     font_size = 5
     font_size_erase = 20
 
+    # threshold 설정
+    noiseth = 800
+    wiper_thresh = 40000
+    background_threshold = 800 # This threshold determines the amount of disruption in background.
 
-    cnt = 0
 
     # start capturing
     while (1):
+
+        # 프레임 초기화
         _, frame = cap.read()
         frame = cv2.flip(frame, 1)
 
+        # Initilize the canvas as a black image
         if canvas is None:
             canvas = np.zeros_like(frame)
 
         if cutcanvas is None:
             cutcanvas = np.zeros_like(frame)
 
+        # 기능 버튼들 설정
         pen_or_eraser_frame = frame[0:50, 0:50]
         paint_cap_frame = frame[0:50, 150:200]
         change_color_frame = frame[0:50, 300:350]
@@ -189,11 +203,15 @@ def start_blackboard():
         fgmask_change_color = backgroundobject.apply(change_color_frame)
         fgmask_change_font_size = backgroundobject.apply(change_font_size_frame)
 
+        # Note the number of pixels that  are white,this is the level of disruption.
         switch_thresh = np.sum(fgmask == 255)
         paint_cap_thresh = np.sum(fgmask_paint_cap == 255)
         change_color_thresh = np.sum(fgmask_change_color == 255)
         font_size_thresh = np.sum(fgmask_change_font_size == 255)
 
+
+        # If the disruption is greater than background threshold and there has been some time after the previous switch
+        # then you can change the object type.
         if switch_thresh > background_threshold and (time.time() - last_switch) > 1:
 
             last_switch = time.time()
@@ -212,8 +230,8 @@ def start_blackboard():
         if font_size_thresh > background_threshold and (time.time() - last_switch) > 1:
             change_font_size = True
 
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
+        # 펜 설정값 로딩
         if load_from_disk:
             lower_range = penval[0]
             upper_range = penval[1]
@@ -222,30 +240,44 @@ def start_blackboard():
             lower_range = np.array([30, 80, 110])
             upper_range = np.array([50, 200, 200])
 
+
+        ## 펜 인식 과정
+        # hsv로 변환
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # 펜 설정값에 맞게 촤좌작
         mask = cv2.inRange(hsv, lower_range, upper_range)
 
+        # 이거저거 하면 좋은 것들
+        # Perform morphological operations to get rid of the noise
         mask = cv2.erode(mask, kernel, iterations=1)
         mask = cv2.dilate(mask, kernel, iterations=2)
 
+        # 펜 윤곽선 따기
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+        # Make sure there is a contour present and also its size is bigger than noise threshold.
         if contours and cv2.contourArea(max(contours, key=cv2.contourArea)) > noiseth:
 
             c = max(contours, key=cv2.contourArea)
             x2, y2, w, h = cv2.boundingRect(c)
 
+            # Get the area of the contour
             area = cv2.contourArea(c)
 
+            # If there were no previous points then save the detected x2,y2 coordinates as x1,y1.
             if x1 == 0 and y1 == 0:
                 x1, y1 = x2, y2
 
             else:
                 if switch == 'Pen':
+                    # 맨 처음 그려질때 튀는거 막기 위해
                     if draw_delay == True:
                         draw_delay = False
 
                         time.sleep(0.25)
                         x1, y1 = x2, y2
+
                     if keyboard.is_pressed(' '):
                         canvas = cv2.line(canvas, (x1, y1), (x2, y2), font_color, font_size)
 
@@ -258,14 +290,20 @@ def start_blackboard():
                 cv2.putText(canvas, 'Clearing Canvas', (0, 200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
                             cv2.LINE_AA)
                 clear = True
+
+        # 윤곽선 탐지 안 될경우 포인터 위치 초기화
         else:
             x1, y1 = 0, 0
 
+        # 하면 아마도 좋은 것들
+        # Now this piece of code is just for smooth drawing. (Optional)
         _, mask = cv2.threshold(cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY), 20, 255, cv2.THRESH_BINARY)
         foreground = cv2.bitwise_and(canvas, canvas, mask=mask)
         background = cv2.bitwise_and(frame, frame, mask=cv2.bitwise_not(mask))
         frame = cv2.add(foreground, background)
 
+
+        # 잘라내기 기능
         if cutchk == True:
             cutx = edx - stx
             cuty = edy - sty
@@ -291,6 +329,7 @@ def start_blackboard():
                 tmpcanvas = None
                 cutchk = False
 
+        # 확대축소 기능
         elif expchk == True or redchk==True:
             if tmpcanvas is None:
                 tmpcanvas = np.zeros_like(frame)
@@ -329,6 +368,8 @@ def start_blackboard():
             expchk=False
             redchk=False
 
+
+        # 기능버튼 아이콘 변경
         if switch != 'Pen':
             cv2.circle(frame, (x1, y1), font_size_erase, (255, 255, 255), -1)
             frame[0:50, 0:50] = eraser_img
@@ -339,12 +380,17 @@ def start_blackboard():
         frame[0:50, 300:350] = change_color_img
         frame[0:50, 450:500] = change_font_size_img
 
+
+        # 프레임 쇼
         cv2.imshow('Untacked Virtual Blackboard', frame)
 
+
+        ## [키 설정]
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
             break
 
+        # 잘라내기 x -> c
         elif k == ord('x'):
             stx, sty = x2, y2
 
@@ -354,9 +400,11 @@ def start_blackboard():
             canvas[sty:edy, stx:edx] = 0
             cutchk = True
 
+        # 붙여넣기 v
         elif k == ord('v'):
             v_chk = True
 
+        # 확대축소 기능
         elif k== ord('a'):
             estx, esty = x2, y2
 
@@ -365,9 +413,13 @@ def start_blackboard():
 
         elif k==ord('d'):
             expchk=True
+
         elif k == ord('f'):
             redchk = True
 
+
+        ## [기능들 동작 과정]
+        # clear canvas
         if clear == True:
             time.sleep(0.5)
             canvas = None
@@ -376,14 +428,16 @@ def start_blackboard():
 
             draw_delay = True
 
+        # 캡쳐 기능 동작
         if paint_cap == True:
             time.sleep(0.25)
             print("그림판 캡쳐")
-            cv2.imwrite("save/ScreenShot{}.png".format(cnt), canvas)
+            cv2.imwrite("save/ScreenShot{}.png".format(screenshotCnt), canvas)
             paint_cap = False
-            cnt += 1
+            screenshotCnt += 1
             draw_delay = True
 
+        # 펜 속성 변경
         if change_color == True:
             change_color = False
 
