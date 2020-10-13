@@ -162,8 +162,10 @@ def start_blackboard():
     change_color = False
     change_font_size = False
 
+    # 딜레이용 변수들
     draw_delay = False
     draw_chk = False
+    additinalDelay = 1 # 초단위임 time.time 정수파트는
 
     screenshotCnt = 0
 
@@ -212,22 +214,33 @@ def start_blackboard():
 
         # If the disruption is greater than background threshold and there has been some time after the previous switch
         # then you can change the object type.
-        if switch_thresh > background_threshold and (time.time() - last_switch) > 1:
+        if switch_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1: # 단순 -1은 분명 역전있을거같긴한데 일단 패스
 
             last_switch = time.time()
+
+            print("펜 지우개 토글")
 
             if switch == 'Pen':
                 switch = 'Eraser'
             else:
                 switch = 'Pen'
 
-        if paint_cap_thresh > background_threshold and (time.time() - last_switch) > 1:
+        if paint_cap_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+
+            last_switch = time.time()
+
             paint_cap = True
 
-        if change_color_thresh > background_threshold and (time.time() - last_switch) > 1:
+        if change_color_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+
+            last_switch = time.time()
+
             change_color = True
 
-        if font_size_thresh > background_threshold and (time.time() - last_switch) > 1:
+        if font_size_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+
+            last_switch = time.time()
+
             change_font_size = True
 
 
@@ -421,7 +434,9 @@ def start_blackboard():
         ## [기능들 동작 과정]
         # clear canvas
         if clear == True:
-            time.sleep(0.5)
+
+            time.sleep(0.25)
+
             canvas = None
 
             clear = False
@@ -430,8 +445,9 @@ def start_blackboard():
 
         # 캡쳐 기능 동작
         if paint_cap == True:
-            time.sleep(0.25)
+
             print("그림판 캡쳐")
+
             cv2.imwrite("save/ScreenShot{}.png".format(screenshotCnt), canvas)
             paint_cap = False
             screenshotCnt += 1
@@ -441,7 +457,6 @@ def start_blackboard():
         if change_color == True:
             change_color = False
 
-            time.sleep(0.25)
             print('펜 컬러 변경')
 
             if font_color[0] and 255:
@@ -456,7 +471,6 @@ def start_blackboard():
         if change_font_size == True:
             change_font_size = False
 
-            time.sleep(0.25)
             print('폰트 사이즈 변경')
 
             if font_size == 5:
