@@ -15,6 +15,7 @@ newTech/faceDetection2/.idea/
 UntackedVirtualBlackBoard/.idea/
 UntackedVirtualBlackBoard/venv/
 UntackedVirtualBlackBoard/save/
+UntackedVirtualBlackBoard/penval.npy/
 
 cameraCalibration/.idea/
 cameraCalibration/venv/
