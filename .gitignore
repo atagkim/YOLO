@@ -16,11 +16,8 @@ UntackedVirtualBlackBoard/.idea/
 UntackedVirtualBlackBoard/venv/
 UntackedVirtualBlackBoard/save/
 UntackedVirtualBlackBoard/penval.npy
+UntackedVirtualBlackBoard/__pycache__/
 
 cameraCalibration/.idea/
 cameraCalibration/venv/
-<<<<<<< HEAD
 cameraCalibration/__pycache__/
-=======
-cameraCalibration/__pycache__/
->>>>>>> 92460b18473c9037a18f4c5cd9b445000ede47c9
