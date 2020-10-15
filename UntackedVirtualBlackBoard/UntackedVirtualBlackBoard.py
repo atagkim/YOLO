@@ -2,11 +2,11 @@ import cv2
 import numpy as np
 import time
 import keyboard
+import test
 
 
 def nothing(x):
     pass
-
 
 def initialize_HSV_values():
     cap = cv2.VideoCapture(0)
@@ -332,6 +332,14 @@ def start_blackboard():
             expchk=True
         elif k == ord('f'):
             redchk = True
+        elif k==ord('n'):
+            if tmpcanvas is None:
+                tmpcanvas = np.zeros_like(frame)
+            test.myOpenGL()
+            test_img = cv2.resize(cv2.imread('test.png', 1), (500, 500))
+            tmpcanvas[100:600, 400:900] = test_img
+            canvas = cv2.add(canvas, tmpcanvas)
+            tmpcanvas=None
 
         if clear == True:
             time.sleep(0.5)
@@ -384,7 +392,7 @@ def start_blackboard():
 
 
 def main():
-    initialize_HSV_values()
+    #initialize_HSV_values()
     start_blackboard()
 
 

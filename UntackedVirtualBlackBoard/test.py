@@ -4,10 +4,10 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 #필요없음
-colors = ((1,0,0),
-          (0,1,0),
-          (0,0,1),
-          (0,0,0))
+colors = ((252/256,210/256,113/256),
+          (247/256,141/256,63/256),
+          (43/256,187/256,216/256),
+          (16/256,46/256,55/256))
 
 #필요없음
 surfaces = ((0,1,2,3),
@@ -44,6 +44,22 @@ def drawCube():
             glVertex3fv(vertices[vertex])
     glEnd()
 
+def drawaxis():
+    glBegin(GL_LINE_LOOP)
+    glVertex3f(10.0,0.0,0.0)
+    glVertex3f(-10.0, 0.0, 0.0)
+    glEnd()
+
+    glBegin(GL_LINE_LOOP)
+    glVertex3f(0.0, 10.0, 0.0)
+    glVertex3f(0.0, -10.0, 0.0)
+    glEnd()
+
+    glBegin(GL_LINE_LOOP)
+    glVertex3f(0.0, 0.0, 10.0)
+    glVertex3f(0.0, 0.0, -10.0)
+    glEnd()
+
 def myOpenGL():
     ###
     test = True
@@ -54,10 +70,11 @@ def myOpenGL():
     ###
 
     pygame.init()
-    display = (800,600)
+    display = (500,500)
     win = pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     gluPerspective(45, (display[0]/display[1]),0.1,50.0)
     glTranslatef(0.0, 0.0, val)
+    print(colors)
     #값 수정
 
     while True:
@@ -110,12 +127,15 @@ def myOpenGL():
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         drawCube()
+        #drawaxis()
 
         ###
-        if k[pygame.K_a]:
-            pygame.image.save(win,'test.png')
+        if k[pygame.K_m]:
+            pygame.image.save(win, 'test.png')
+            break
 
         pygame.display.flip()
         pygame.time.wait(10)
+    pygame.quit()
 
-myOpenGL()
+#myOpenGL()
