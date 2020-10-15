@@ -165,7 +165,7 @@ def start_blackboard():
     # 딜레이용 변수들
     draw_delay = False
     draw_chk = False
-    additinalDelay = 1 # 초단위임 time.time 정수파트는
+    additinalDelay = 0.5 # 초단위임 time.time 정수파트는
 
     screenshotCnt = 0
 
@@ -177,7 +177,7 @@ def start_blackboard():
     # threshold 설정
     noiseth = 800
     wiper_thresh = 40000
-    background_threshold = 1000 # This threshold determines the amount of disruption in background.
+    background_threshold = 200 # This threshold determines the amount of disruption in background.
 
 
     # start capturing
@@ -193,55 +193,6 @@ def start_blackboard():
 
         if cutcanvas is None:
             cutcanvas = np.zeros_like(frame)
-
-        # 기능 버튼들 설정
-        pen_or_eraser_frame = frame[0:50, 0:50]
-        paint_cap_frame = frame[0:50, 150:200]
-        change_color_frame = frame[0:50, 300:350]
-        change_font_size_frame = frame[0:50, 450:500]
-
-        fgmask = backgroundobject.apply(pen_or_eraser_frame)
-        fgmask_paint_cap = backgroundobject.apply(paint_cap_frame)
-        fgmask_change_color = backgroundobject.apply(change_color_frame)
-        fgmask_change_font_size = backgroundobject.apply(change_font_size_frame)
-
-        # Note the number of pixels that  are white,this is the level of disruption.
-        switch_thresh = np.sum(fgmask == 255)
-        paint_cap_thresh = np.sum(fgmask_paint_cap == 255)
-        change_color_thresh = np.sum(fgmask_change_color == 255)
-        font_size_thresh = np.sum(fgmask_change_font_size == 255)
-
-
-        # If the disruption is greater than background threshold and there has been some time after the previous switch
-        # then you can change the object type.
-        if switch_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1: # 단순 -1은 분명 역전있을거같긴한데 일단 패스
-
-            last_switch = time.time()
-
-            print("펜 지우개 토글")
-
-            if switch == 'Pen':
-                switch = 'Eraser'
-            else:
-                switch = 'Pen'
-
-        if paint_cap_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
-
-            last_switch = time.time()
-
-            paint_cap = True
-
-        if change_color_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
-
-            last_switch = time.time()
-
-            change_color = True
-
-        if font_size_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
-
-            last_switch = time.time()
-
-            change_font_size = True
 
 
         # 펜 설정값 로딩
@@ -268,6 +219,50 @@ def start_blackboard():
 
         # 펜 윤곽선 따기
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+
+        # 기능 버튼들 설정
+        pen_or_eraser_frame = mask[0:50, 0:50]
+        paint_cap_frame = mask[0:50, 150:200]
+        change_color_frame = mask[0:50, 300:350]
+        change_font_size_frame = mask[0:50, 450:500]
+
+        # Note the number of pixels that are white,this is the level of disruption.
+        switch_thresh = np.sum(pen_or_eraser_frame == 255)
+        paint_cap_thresh = np.sum(paint_cap_frame == 255)
+        change_color_thresh = np.sum(change_color_frame == 255)
+        font_size_thresh = np.sum(change_font_size_frame == 255)
+
+
+        # If the disruption is greater than background threshold and there has been some time after the previous switch
+        # then you can change the object type.
+        if switch_thresh > background_threshold and (
+                time.time() - last_switch - additinalDelay) > 1:  # 단순 -1은 분명 역전있을거같긴한데 일단 패스
+
+            last_switch = time.time()
+
+            print("펜 지우개 토글")
+
+            if switch == 'Pen':
+                switch = 'Eraser'
+            else:
+                switch = 'Pen'
+
+        if paint_cap_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+            last_switch = time.time()
+
+            paint_cap = True
+
+        if change_color_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+            last_switch = time.time()
+
+            change_color = True
+
+        if font_size_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+            last_switch = time.time()
+
+            change_font_size = True
+
 
         # Make sure there is a contour present and also its size is bigger than noise threshold.
         if contours and cv2.contourArea(max(contours, key=cv2.contourArea)) > noiseth:
