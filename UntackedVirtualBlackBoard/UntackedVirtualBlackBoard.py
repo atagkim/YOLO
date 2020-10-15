@@ -154,6 +154,7 @@ def start_blackboard():
     eedy = 0
 
     # 확대 축소 좌표 & 플래그
+
     expchk = False
     redchk = False
     v_chk = False
@@ -235,11 +236,6 @@ def start_blackboard():
         change_color_thresh = np.sum(change_color_frame == 255)
         font_size_thresh = np.sum(change_font_size_frame == 255)
 
-        # Note the number of pixels that are white,this is the level of disruption.
-        switch_thresh = np.sum(pen_or_eraser_frame == 255)
-        paint_cap_thresh = np.sum(paint_cap_frame == 255)
-        change_color_thresh = np.sum(change_color_frame == 255)
-        font_size_thresh = np.sum(change_font_size_frame == 255)
 
         # If the disruption is greater than background threshold and there has been some time after the previous switch
         # then you can change the object type.
@@ -431,6 +427,7 @@ def start_blackboard():
 
         elif k == ord('f'):
             redchk = True
+
         elif k==ord('n'):
             if tmpcanvas is None:
                 tmpcanvas = np.zeros_like(frame)
