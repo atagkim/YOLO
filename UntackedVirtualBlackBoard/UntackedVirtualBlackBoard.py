@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import time
 import keyboard
-import DrawOpenGL
+import modules.DrawOpenGL as DrawOpenGL
 
 # 콜백용으로 만들어놓은 아무것도 아닌 함수
 def nothing(x):
