@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import time
 import keyboard
-import test
+import DrawOpenGL
 
 # 콜백용으로 만들어놓은 아무것도 아닌 함수
 def nothing(x):
@@ -119,6 +119,7 @@ def start_blackboard():
     paint_cap_img = cv2.resize(cv2.imread('images/camera1.png', 1), (50, 50))
     change_color_img = cv2.resize(cv2.imread('images/change_color_img.png', 1), (50, 50))
     change_font_size_img = cv2.resize(cv2.imread('images/change_font_size.png', 1), (50, 50))
+    add_3d_img = cv2.resize(cv2.imread('images/tmp.png', 1), (50, 50))
 
     kernel = np.ones((5, 5), np.uint8)
 
@@ -164,6 +165,7 @@ def start_blackboard():
     paint_cap = False
     change_color = False
     change_font_size = False
+    add_3d=False
 
     # 딜레이용 변수들
     draw_delay = False
@@ -229,12 +231,14 @@ def start_blackboard():
         paint_cap_frame = mask[0:50, 150:200]
         change_color_frame = mask[0:50, 300:350]
         change_font_size_frame = mask[0:50, 450:500]
+        add_3d_frame = mask[0:50, 600:650]
 
         # Note the number of pixels that are white,this is the level of disruption.
         switch_thresh = np.sum(pen_or_eraser_frame == 255)
         paint_cap_thresh = np.sum(paint_cap_frame == 255)
         change_color_thresh = np.sum(change_color_frame == 255)
         font_size_thresh = np.sum(change_font_size_frame == 255)
+        add_3d_thresh = np.sum(add_3d_frame == 255)
 
 
         # If the disruption is greater than background threshold and there has been some time after the previous switch
@@ -265,6 +269,11 @@ def start_blackboard():
             last_switch = time.time()
 
             change_font_size = True
+
+        if add_3d_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+            last_switch = time.time()
+
+            add_3d = True
 
 
         # Make sure there is a contour present and also its size is bigger than noise threshold.
@@ -390,6 +399,7 @@ def start_blackboard():
         frame[0:50, 150:200] = paint_cap_img
         frame[0:50, 300:350] = change_color_img
         frame[0:50, 450:500] = change_font_size_img
+        frame[0:50, 600:650] = add_3d_img
 
 
         # 프레임 쇼
@@ -428,14 +438,15 @@ def start_blackboard():
         elif k == ord('f'):
             redchk = True
 
-        elif k==ord('n'):
+        if add_3d==True:
             if tmpcanvas is None:
                 tmpcanvas = np.zeros_like(frame)
-            test.myOpenGL()
-            test_img = cv2.resize(cv2.imread('test.png', 1), (500, 500))
-            tmpcanvas[100:600, 400:900] = test_img
+            DrawOpenGL.myOpenGL()
+            cube_img = cv2.resize(cv2.imread('Cube.png', 1), (500, 500))
+            tmpcanvas[100:600, 400:900] = cube_img
             canvas = cv2.add(canvas, tmpcanvas)
             tmpcanvas=None
+            add_3d=False
 
         ## [기능들 동작 과정]
         # clear canvas
