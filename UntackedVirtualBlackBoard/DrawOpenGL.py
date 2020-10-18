@@ -167,14 +167,10 @@ def myOpenGL():
 
         k = pygame.key.get_pressed()
         if k[pygame.K_s]:
-            if chk_shape=='Cube':
-                pygame.image.save(win, 'Cube.png')
-                pygame.quit()
-                break
-            elif chk_shape=='Pyramid':
-                pygame.image.save(win, 'Pyramid.png')
-                pygame.quit()
-                break
+            chk_first=False
+            pygame.image.save(win, '3D.png')
+            pygame.quit()
+            break
 
         if k[pygame.K_ESCAPE]:
             pygame.quit()

@@ -401,7 +401,6 @@ def start_blackboard():
         frame[0:50, 450:500] = change_font_size_img
         frame[0:50, 600:650] = add_3d_img
 
-
         # 프레임 쇼
         cv2.imshow('Untacked Virtual Blackboard', frame)
 
@@ -441,9 +440,9 @@ def start_blackboard():
         if add_3d==True:
             if tmpcanvas is None:
                 tmpcanvas = np.zeros_like(frame)
-            DrawOpenGL.myOpenGL()
-            cube_img = cv2.resize(cv2.imread('Cube.png', 1), (500, 500))
-            tmpcanvas[100:600, 400:900] = cube_img
+            DrawOpenGL.main()
+            OpenGL_img = cv2.resize(cv2.imread('3D.png', 1), (500, 500))
+            tmpcanvas[100:600, 400:900] = OpenGL_img
             canvas = cv2.add(canvas, tmpcanvas)
             tmpcanvas=None
             add_3d=False
