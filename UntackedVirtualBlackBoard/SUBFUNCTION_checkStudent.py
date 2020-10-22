@@ -1,7 +1,6 @@
 import cv2
 import time
 
-
 canvas = None
 
 cap = cv2.VideoCapture(0)
@@ -15,6 +14,7 @@ currentTime = 0
 result = 0
 flag = 0
 
+last_switch = 0;
 
 while(True):
     ret, frame = cap.read()
@@ -42,11 +42,14 @@ while(True):
         else:
             result = currentTime - beforeTime
 
-        print("beforeTime",beforeTime)
-        print("currentTime", currentTime)
 
-        if(result > 2):
+        if(result > 2 and time.time() - last_switch > 1):
+            last_switch = time.time();
+
             cv2.putText(frame, '25th student no attention', (840, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 0)
+
+            print("beforeTime", beforeTime)
+            print("currentTime", currentTime)
             print("집중 안하고 있닭")
 
 
@@ -61,8 +64,12 @@ while(True):
 
 
     cv2.imshow('frame',frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+
+    esckey = cv2.waitKey(5) & 0xFF
+    if esckey == 27:
         break
+
+
 
 cap.release()
 cv2.destroyAllWindows()
