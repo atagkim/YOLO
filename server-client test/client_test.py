@@ -1,18 +1,91 @@
 import socket
+import cv2
+import time
 
-# ip address and port of the server
-HOST, PORT= 'localhost', 9876
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def check_student(name, cs):
+    import cv2
+    import time
 
-client_socket.connect((HOST, PORT))
+    canvas = None
 
-while True:
-    data = input('enter: ')
-    # exit command
-    if(data=='q'):
-        print('exit')
-        break
+    cap = cv2.VideoCapture(0)
+    cap.set(3, 1280)
+    cap.set(4, 720)
 
-    client_socket.send(data.encode('ascii'))
+    face_cascade = cv2.CascadeClassifier('haarcascade_frontface.xml')
 
-client_socket.close()
+    beforeTime = 0
+    currentTime = 0
+    result = 0
+    flag = 0
+
+    last_switch = 0;
+
+    while (True):
+        ret, frame = cap.read()
+        frame = cv2.flip(frame, 1)
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+        if (len(faces) == 0):
+
+            ttm = time.time()
+            rtm = time.gmtime(ttm)
+
+            if (flag == 0):
+                flag = 1
+                beforeTime = rtm.tm_sec
+                currentTime = beforeTime
+
+            else:
+                currentTime = rtm.tm_sec
+
+            if (currentTime - beforeTime < 0):
+                result = currentTime - beforeTime + 60
+            else:
+                result = currentTime - beforeTime
+
+            if (result > 2 and time.time() - last_switch > 1):
+                last_switch = time.time();
+
+                data = '{} no attention'.format(name)
+                cs.send(data.encode('ascii'))
+                # cv2.putText(frame, '25th student no attention', (840, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 0)
+
+                print("beforeTime", beforeTime)
+                print("currentTime", currentTime)
+                print("집중 안하고 있닭")
+
+
+        else:
+            currentTime = 0
+            beforeTime = 0
+            flag = 0
+
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+        cv2.imshow('frame', frame)
+
+        esckey = cv2.waitKey(5) & 0xFF
+        if esckey == 27:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+# data = '{} no attention'.format(name)
+#                 cs.send(data.encode('ascii'))
+def main():
+    # ip address and port of the server
+
+    HOST, PORT = '127.0.0.1', 9876
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    client_socket.connect((HOST, PORT))
+    check_student("name", client_socket)
+
+
+if __name__ == "__main__":
+    main()
