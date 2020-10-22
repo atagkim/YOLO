@@ -1,7 +1,7 @@
 import socket
 from threading import Thread
 
-HOST, PORT = "127.0.0.1", 9876
+HOST, PORT = "", 9876
 ADDR = (HOST, PORT)
 BUFF_SIZE = 1024
 
@@ -21,7 +21,7 @@ class ClientThread(Thread):
                 print('[Client({}, {})]: closed'.format(self.host, self.port))
                 break
 
-            print('[Client({}, {})]: {}'.format(self.host, self.port, data))
+            print('[Client({}, {})]: {}'.format(self.host, self.port, data.decode()))
 
 def main():
     serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

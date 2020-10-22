@@ -1,6 +1,8 @@
 import socket
 import cv2
 import time
+import sys
+from PyQt5.QtWidgets import *
 
 def check_student(name, cs):
     import cv2
@@ -50,12 +52,14 @@ def check_student(name, cs):
                 last_switch = time.time();
 
                 data = '{} no attention'.format(name)
-                cs.send(data.encode('ascii'))
-                # cv2.putText(frame, '25th student no attention', (840, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 0)
+                print("data: ", data)
 
-                print("beforeTime", beforeTime)
-                print("currentTime", currentTime)
-                print("집중 안하고 있닭")
+                cs.send(data.encode())
+
+
+                # print("beforeTime", beforeTime)
+                # print("currentTime", currentTime)
+                print(name, " 집중 안하고 있닭")
 
 
         else:
@@ -75,17 +79,90 @@ def check_student(name, cs):
     cap.release()
     cv2.destroyAllWindows()
 
-# data = '{} no attention'.format(name)
-#                 cs.send(data.encode('ascii'))
+
+class CLineEditWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUI()
+
+    def setupUI(self):
+        self.setWindowTitle("Input Name")
+        self.setGeometry(100, 100, 300, 100)
+
+        self.label = QLabel("name : ", self)
+        self.label.move(20, 20)
+        self.label.resize(150, 20)
+
+        self.lineEdit = QLineEdit("", self)
+        self.lineEdit.move(60, 20)
+        self.lineEdit.resize(200, 20)
+        self.lineEdit.textChanged.connect(self.lineEdit_textChanged)
+
+        self.statusBar = QStatusBar(self)
+        self.setStatusBar(self.statusBar)
+
+        btnSave = QPushButton("Save", self)
+        btnSave.move(10, 50)
+        btnSave.clicked.connect(self.btnSave_clicked)
+
+        btnClear = QPushButton("Reset", self)
+        btnClear.move(100, 50)
+        btnClear.clicked.connect(self.btnClear_clicked)
+
+        btnQuit = QPushButton("Exit", self)
+        btnQuit.move(190, 50)
+        btnQuit.clicked.connect(self.btnQuit_clicked)
+        # btnQuit.clicked.connect(QCoreApplication.instance().quit)
+
+    def btnSave_clicked(self):
+        print("Save?")
+        msg = "Do you want to save?"
+        msg += "\nname : " + self.lineEdit.text()
+        buttonReply = QMessageBox.question(self, 'save', msg,
+                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        # QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
+
+        if buttonReply == QMessageBox.Yes:
+            print('Yes')
+            # save
+            QMessageBox.about(self, "Save", "Saved")
+            self.statusBar.showMessage("Saved completely")
+
+            name = self.lineEdit.text()
+            print("name: ", name)
+            self.close()
+
+            # ip address and port of the server
+            HOST, PORT = '3.34.49.51', 9876
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            client_socket.connect((HOST, PORT))
+            check_student(name, client_socket)
+
+        if buttonReply == QMessageBox.No:
+            print('No')
+        if buttonReply == QMessageBox.Cancel:
+            print('Cancel')
+
+    def btnClear_clicked(self):
+        # clear
+        self.lineEdit.clear()
+
+    def btnQuit_clicked(self):
+        # exit
+        sys.exit()
+
+    def lineEdit_textChanged(self):
+        pass
+        # self.statusBar.showMessage(self.lineEdit.text())
+
+
+
 def main():
-    # ip address and port of the server
-
-    HOST, PORT = '127.0.0.1', 9876
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    client_socket.connect((HOST, PORT))
-    check_student("name", client_socket)
-
+    app = QApplication(sys.argv)
+    window = CLineEditWindow()
+    window.show()
+    app.exec_()
 
 if __name__ == "__main__":
     main()
