@@ -133,6 +133,13 @@ def start_blackboard():
     red_img=cv2.resize(cv2.imread('images/red.png', 1), (100, 100))
     white_img=cv2.resize(cv2.imread('images/white.png', 1), (100, 100))
 
+    #펜 크기
+    pen5_img=cv2.resize(cv2.imread('images/5px.png', 1), (100, 100))
+    pen10_img=cv2.resize(cv2.imread('images/10px.png', 1), (100, 100))
+    pen15_img=cv2.resize(cv2.imread('images/15px.png', 1), (100, 100))
+    pen20_img=cv2.resize(cv2.imread('images/20px.png', 1), (100, 100))
+    pen30_img=cv2.resize(cv2.imread('images/30px.png', 1), (100, 100))
+
     kernel = np.ones((5, 5), np.uint8)
 
     # Making window size adjustable
@@ -301,7 +308,10 @@ def start_blackboard():
         if font_size_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
             last_switch = time.time()
 
-            change_font_size = True
+            if change_font_size == False:
+                change_font_size = True
+            else:
+                change_font_size = False
 
         if add_3d_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
             last_switch = time.time()
@@ -437,12 +447,25 @@ def start_blackboard():
             #frame[0:50, 600:650] = add_3d_img
 
             if change_color == True :
-                # 640,360
-                frame[110:210, 840:940] = chacol_img
-                frame[210:310, 840:940] = green_img
-                frame[310:410, 840:940] = pink_img
-                frame[410:510, 840:940] = red_img
-                frame[510:610, 840:940] = white_img
+                if change_font_size==True:
+                    change_color=False
+                else:
+                    # 640,360
+                    frame[110:210, 840:940] = chacol_img
+                    frame[210:310, 840:940] = green_img
+                    frame[310:410, 840:940] = pink_img
+                    frame[410:510, 840:940] = red_img
+                    frame[510:610, 840:940] = white_img
+
+            if change_font_size == True:
+                if change_color == True:
+                    change_font_size = False
+                else:
+                    frame[110:210, 840:940] = pen5_img
+                    frame[210:310, 840:940] = pen10_img
+                    frame[310:410, 840:940] = pen15_img
+                    frame[410:510, 840:940] = pen20_img
+                    frame[510:610, 840:940] = pen30_img
 
         tmpcanvas = None
 
@@ -593,16 +616,35 @@ def start_blackboard():
             draw_delay = True
 
         if change_font_size == True:
-            change_font_size = False
 
-            print('폰트 사이즈 변경')
-
-            if font_size == 5:
-                font_size = 20
-                font_size_erase = 100
-            else:
+            if add_chacol_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
                 font_size = 5
                 font_size_erase = 20
+                change_font_size = False
+
+            if add_green_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                font_size = 10
+                font_size_erase = 50
+                change_font_size = False
+
+            if add_pink_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                font_size = 15
+                font_size_erase = 70
+                change_font_size = False
+
+            if add_red_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                font_size = 20
+                font_size_erase = 100
+                change_font_size = False
+
+            if add_white_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                font_size = 30
+                font_size_erase = 150
+                change_font_size = False
 
             draw_delay = True
 
