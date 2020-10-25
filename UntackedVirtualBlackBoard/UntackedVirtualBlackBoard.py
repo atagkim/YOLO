@@ -3,6 +3,7 @@ import numpy as np
 import time
 import keyboard
 import modules.DrawOpenGL as DrawOpenGL
+from PIL import ImageGrab
 
 # 콜백용으로 만들어놓은 아무것도 아닌 함수
 def nothing(x):
@@ -120,6 +121,24 @@ def start_blackboard():
     change_color_img = cv2.resize(cv2.imread('images/change_color_img.png', 1), (50, 50))
     change_font_size_img = cv2.resize(cv2.imread('images/change_font_size.png', 1), (50, 50))
     add_3d_img = cv2.resize(cv2.imread('images/tmp.png', 1), (50, 50))
+
+    #툴바
+    tool_eraser_img=cv2.resize(cv2.imread('images/tool_eraser.png', 1), (650, 50))
+    tool_pen_img=cv2.resize(cv2.imread('images/tool_pen.png', 1), (650, 50))
+
+    #색깔
+    chacol_img=cv2.resize(cv2.imread('images/chacol.png', 1), (100, 100))
+    green_img=cv2.resize(cv2.imread('images/green.png', 1), (100, 100))
+    pink_img=cv2.resize(cv2.imread('images/pink.png', 1), (100, 100))
+    red_img=cv2.resize(cv2.imread('images/red.png', 1), (100, 100))
+    white_img=cv2.resize(cv2.imread('images/white.png', 1), (100, 100))
+
+    #펜 크기
+    pen5_img=cv2.resize(cv2.imread('images/5px.png', 1), (100, 100))
+    pen10_img=cv2.resize(cv2.imread('images/10px.png', 1), (100, 100))
+    pen15_img=cv2.resize(cv2.imread('images/15px.png', 1), (100, 100))
+    pen20_img=cv2.resize(cv2.imread('images/20px.png', 1), (100, 100))
+    pen30_img=cv2.resize(cv2.imread('images/30px.png', 1), (100, 100))
 
     kernel = np.ones((5, 5), np.uint8)
 
@@ -240,6 +259,23 @@ def start_blackboard():
         font_size_thresh = np.sum(change_font_size_frame == 255)
         add_3d_thresh = np.sum(add_3d_frame == 255)
 
+        #640,360
+        # 왼쪽 아래 대각선
+        add_chacol_frame = mask[110:210, 840:940]
+        add_chacol_thresh = np.sum(add_chacol_frame == 255)
+        # 아래쪽
+        add_green_frame = mask[210:310, 840:940]
+        add_green_thresh = np.sum(add_green_frame == 255)
+        # 오른쪽 아래 대각선
+        add_pink_frame = mask[310:410, 840:940]
+        add_pink_thresh = np.sum(add_pink_frame == 255)
+        # 오른쪽
+        add_red_frame = mask[410:510, 840:940]
+        add_red_thresh = np.sum(add_red_frame == 255)
+        # 왼쪽 위 대각선
+        add_white_frame = mask[510:610, 840:940]
+        add_white_thresh = np.sum(add_white_frame == 255)
+
 
         # If the disruption is greater than background threshold and there has been some time after the previous switch
         # then you can change the object type.
@@ -263,12 +299,19 @@ def start_blackboard():
         if change_color_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
             last_switch = time.time()
 
-            change_color = True
+            if change_color == False:
+                change_color = True
+            else:
+                change_color = False
+
 
         if font_size_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
             last_switch = time.time()
 
-            change_font_size = True
+            if change_font_size == False:
+                change_font_size = True
+            else:
+                change_font_size = False
 
         if add_3d_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
             last_switch = time.time()
@@ -392,15 +435,39 @@ def start_blackboard():
         # 기능버튼 아이콘 변경
         if switch != 'Pen':
             cv2.circle(frame, (x1, y1), font_size_erase, (255, 255, 255), -1)
-            frame[0:50, 0:50] = eraser_img
+            frame[0:50, 0:650] = tool_eraser_img
+            #frame[0:50, 0:50] = eraser_img
         else:
-            frame[0:50, 0:50] = pen_img
+            frame[0:50, 0:650] = tool_pen_img
+            #frame[0:50, 0:50] = pen_img
 
-        frame[0:50, 150:200] = paint_cap_img
-        frame[0:50, 300:350] = change_color_img
-        frame[0:50, 450:500] = change_font_size_img
-        frame[0:50, 600:650] = add_3d_img
+            #frame[0:50, 150:200] = paint_cap_img
+            #frame[0:50, 300:350] = change_color_img
+            #frame[0:50, 450:500] = change_font_size_img
+            #frame[0:50, 600:650] = add_3d_img
 
+            if change_color == True :
+                if change_font_size==True:
+                    change_color=False
+                else:
+                    # 640,360
+                    frame[110:210, 840:940] = chacol_img
+                    frame[210:310, 840:940] = green_img
+                    frame[310:410, 840:940] = pink_img
+                    frame[410:510, 840:940] = red_img
+                    frame[510:610, 840:940] = white_img
+
+            if change_font_size == True:
+                if change_color == True:
+                    change_font_size = False
+                else:
+                    frame[110:210, 840:940] = pen5_img
+                    frame[210:310, 840:940] = pen10_img
+                    frame[310:410, 840:940] = pen15_img
+                    frame[410:510, 840:940] = pen20_img
+                    frame[510:610, 840:940] = pen30_img
+
+        tmpcanvas = None
 
         # 프레임 쇼
         cv2.imshow('Untacked Virtual Blackboard', frame)
@@ -438,6 +505,23 @@ def start_blackboard():
         elif k == ord('f'):
             redchk = True
 
+        #클립보드 이미지 획득
+        elif k == ord('o'):
+
+            if tmpcanvas is None:
+                tmpcanvas = np.zeros_like(frame)
+
+            im = ImageGrab.grabclipboard()
+            try:
+                im.save('images/clipboard.png', 'PNG')  # PNG 포맷으로 저장
+                clipboard_img = cv2.resize(cv2.imread('images/clipboard.png', 1), (500, 500))
+                tmpcanvas[100:600,400:900]=clipboard_img
+                canvas=cv2.add(canvas,tmpcanvas)
+            except AttributeError:
+                print("클립보드에 이미지가 없습니다")
+
+            tmpcanvas = None
+
         if add_3d==True:
             if tmpcanvas is None:
                 tmpcanvas = np.zeros_like(frame)
@@ -472,30 +556,95 @@ def start_blackboard():
 
         # 펜 속성 변경
         if change_color == True:
-            change_color = False
 
-            print('펜 컬러 변경')
+            if add_chacol_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                print('펜 컬러 변경')
+                #b
+                font_color[0]=255
+                #g
+                font_color[1]=255
+                #r
+                font_color[2]=0
+                change_color = False
+                change_color = False
 
-            if font_color[0] and 255:
-                font_color[0] = 0
-                font_color[2] = 255
-            else:
-                font_color[0] = 255
-                font_color[2] = 0
+            if add_green_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                print('펜 컬러 변경')
+                #b
+                font_color[0]=204
+                #g
+                font_color[1]=255
+                #r
+                font_color[2]=102
+                change_color = False
+
+            if add_pink_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                print('펜 컬러 변경')
+                #b
+                font_color[0]=204
+                #g
+                font_color[1]=51
+                #r
+                font_color[2]=255
+                change_color = False
+
+            if add_red_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                print('펜 컬러 변경')
+                #b
+                font_color[0]=51
+                #g
+                font_color[1]=0
+                #r
+                font_color[2]=255
+                change_color = False
+
+            if add_white_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                print('펜 컬러 변경')
+                #b
+                font_color[0]=255
+                #g
+                font_color[1]=255
+                #r
+                font_color[2]=255
+                change_color = False
 
             draw_delay = True
 
         if change_font_size == True:
-            change_font_size = False
 
-            print('폰트 사이즈 변경')
-
-            if font_size == 5:
-                font_size = 20
-                font_size_erase = 100
-            else:
+            if add_chacol_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
                 font_size = 5
                 font_size_erase = 20
+                change_font_size = False
+
+            if add_green_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                font_size = 10
+                font_size_erase = 50
+                change_font_size = False
+
+            if add_pink_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                font_size = 15
+                font_size_erase = 70
+                change_font_size = False
+
+            if add_red_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                last_switch = time.time()
+                font_size = 20
+                font_size_erase = 100
+                change_font_size = False
+
+            if add_white_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+                font_size = 30
+                font_size_erase = 150
+                change_font_size = False
 
             draw_delay = True
 
@@ -504,11 +653,9 @@ def start_blackboard():
 
 
 def main():
-    #initialize_HSV_values()
+    initialize_HSV_values()
     start_blackboard()
 
 
 if __name__ == "__main__":
     main()
-
-
