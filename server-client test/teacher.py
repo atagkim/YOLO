@@ -17,7 +17,5 @@ client_sock.send(data.encode())
 
 while True:
     data = client_sock.recv(BUFF_SIZE)
-    if not data:
-        break
 
     print("[SERVER]: {}".format(data))

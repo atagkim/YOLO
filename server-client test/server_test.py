@@ -1,13 +1,14 @@
 import socket
 from threading import Thread
 
+import time
+
 HOST, PORT = "", 9876
 ADDR = (HOST, PORT)
 BUFF_SIZE = 1024
 TEACHER = b"0"
 STUDENT = b"1"
-teacher_sock = "x"
-sv = 1
+tthreads = []
 
 class StudentThread(Thread):
     def __init__(self,host,port,sock,id):
@@ -19,21 +20,10 @@ class StudentThread(Thread):
         print('[Student({}, {})]: connected'.format(self.host, self.port))
 
     def run(self):
-        global teacher_sock
-        global sv
-
         while True:
+            global tthreads
             data = self.client_sock.recv(BUFF_SIZE)
-            if not data:
-                print('[Student({}, {})]: closed'.format(self.host, self.port))
-                break
-            print('[Student({}, {})]: {}'.format(self.host, self.port, data.decode()))
-
-            teacher_sock.send(data.encode())
-            try:
-                sv += 1
-            except:
-                print("Teacher is not connected")
+            tthreads[-1].send(data)
 
 
 class TeacherThread(Thread):
@@ -45,15 +35,13 @@ class TeacherThread(Thread):
         self.id = id
         print('[Teacher({}, {})]: connected'.format(self.host, self.port))
 
+
     def run(self):
-        import time
-        global sv
+        global tthreads
+        tthreads.append(self.client_sock)
+
         while True:
-            time.sleep(1)
-            print("sv:", sv)
-            # data = self.client_sock.recv(BUFF_SIZE)
-            # if not data:
-            #     break
+            data = self.client_sock.recv(BUFF_SIZE)
 
 
 def main():
@@ -69,14 +57,16 @@ def main():
         print('Connection from ', (host, port))
 
         id = client_sock.recv(BUFF_SIZE)
-        print("id: {}".format(id))
+
         if id==TEACHER:
             newthread = TeacherThread(host, port, client_sock, id)
+            newthread.start()
             print("Teacher is connected")
         elif id==STUDENT:
             newthread = StudentThread(host, port, client_sock, id)
+            newthread.start()
             print("Student is connected")
-        newthread.start()
+
 
 
 if __name__ == "__main__":

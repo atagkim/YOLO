@@ -6,6 +6,13 @@ import modules.DrawOpenGL as DrawOpenGL
 import modules.helper as helper
 from PIL import ImageGrab
 
+import socket
+BUFF_SIZE = 1024
+TEACHER = "0"
+
+OUR_IP_ADDR = "3.34.49.51"
+# OUR_IP_ADDR = "127.0.0.1"
+
 # 콜백용으로 만들어놓은 아무것도 아닌 함수
 def nothing(x):
     pass
@@ -650,9 +657,32 @@ def start_blackboard():
     cap.release()
 
 
+def check_student():
+    # ip address and port of the server
+    HOST, PORT = OUR_IP_ADDR, 9876
+    client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    client_sock.connect((HOST, PORT))
+    print("Connected with server")
+
+    data = TEACHER
+    client_sock.send(data.encode())
+
+    while True:
+        # 졸고 있는 학생 이름
+        data = client_sock.recv(BUFF_SIZE)
+        print("from server: {}".format(data))
+
+
 def main():
+    from threading import Thread
+    t = Thread(target=check_student)
+    t.start()
+
     initialize_HSV_values()
     start_blackboard()
+
+    t.join()
 
 
 if __name__ == "__main__":
