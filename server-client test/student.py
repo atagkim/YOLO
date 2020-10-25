@@ -4,6 +4,11 @@ import time
 import sys
 from PyQt5.QtWidgets import *
 
+OUR_IP_ADDR = "3.34.49.51"
+# OUR_IP_ADDR = "127.0.0.1"
+STUDENT = "1"
+
+
 def check_student(name, cs):
     import cv2
     import time
@@ -56,12 +61,7 @@ def check_student(name, cs):
 
                 cs.send(data.encode())
 
-
-                # print("beforeTime", beforeTime)
-                # print("currentTime", currentTime)
                 print(name, " 집중 안하고 있닭")
-
-
         else:
             currentTime = 0
             beforeTime = 0
@@ -133,11 +133,16 @@ class CLineEditWindow(QMainWindow):
             self.close()
 
             # ip address and port of the server
-            HOST, PORT = '3.34.49.51', 9876
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            HOST, PORT = OUR_IP_ADDR, 9876
+            client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-            client_socket.connect((HOST, PORT))
-            check_student(name, client_socket)
+            client_sock.connect((HOST, PORT))
+            print("Connected with server")
+
+            data = STUDENT
+            client_sock.send(data.encode())
+
+            check_student(name, client_sock)
 
         if buttonReply == QMessageBox.No:
             print('No')
@@ -157,12 +162,28 @@ class CLineEditWindow(QMainWindow):
         # self.statusBar.showMessage(self.lineEdit.text())
 
 
-
 def main():
     app = QApplication(sys.argv)
     window = CLineEditWindow()
     window.show()
     app.exec_()
 
+
 if __name__ == "__main__":
-    main()
+    # ip address and port of the server
+    HOST, PORT = OUR_IP_ADDR, 9876
+    client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    client_sock.connect((HOST, PORT))
+    print("Connected with server")
+
+    data = STUDENT
+    client_sock.send(data.encode())
+
+    while (True):
+        time.sleep(1)
+        data = '{} no attention'.format("test")
+        print("data: ", data)
+
+        client_sock.send(data.encode())
+    # main()
