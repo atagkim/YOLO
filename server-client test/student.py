@@ -170,20 +170,20 @@ def main():
 
 
 if __name__ == "__main__":
-    # ip address and port of the server
-    HOST, PORT = OUR_IP_ADDR, 9876
-    client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    client_sock.connect((HOST, PORT))
-    print("Connected with server")
-
-    data = STUDENT
-    client_sock.send(data.encode())
-
-    while (True):
-        time.sleep(1)
-        data = '{}'.format("honghong")
-        print("data: ", data)
-
-        client_sock.send(data.encode())
-    # main()
+    # # ip address and port of the server
+    # HOST, PORT = OUR_IP_ADDR, 9876
+    # client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #
+    # client_sock.connect((HOST, PORT))
+    # print("Connected with server")
+    #
+    # data = STUDENT
+    # client_sock.send(data.encode())
+    #
+    # while (True):
+    #     time.sleep(1)
+    #     data = '{}'.format("honghong")
+    #     print("data: ", data)
+    #
+    #     client_sock.send(data.encode())
+    main()
