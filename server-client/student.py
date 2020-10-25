@@ -60,8 +60,6 @@ def check_student(name, cs):
                 print("data: ", data)
 
                 cs.send(data.encode())
-
-                print(name, " ?? ??? ??")
         else:
             currentTime = 0
             beforeTime = 0
