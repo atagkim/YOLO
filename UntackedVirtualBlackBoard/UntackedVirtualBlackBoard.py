@@ -127,18 +127,18 @@ def start_blackboard():
     tool_pen_img=cv2.resize(cv2.imread('images/tool_pen.png', 1), (650, 50))
 
     #색깔
-    chacol_img=cv2.resize(cv2.imread('images/chacol.png', 1), (100, 100))
-    green_img=cv2.resize(cv2.imread('images/green.png', 1), (100, 100))
-    pink_img=cv2.resize(cv2.imread('images/pink.png', 1), (100, 100))
-    red_img=cv2.resize(cv2.imread('images/red.png', 1), (100, 100))
-    white_img=cv2.resize(cv2.imread('images/white.png', 1), (100, 100))
+    chacol_img=cv2.resize(cv2.imread('images/chacol.png', 1), (50, 50))
+    green_img=cv2.resize(cv2.imread('images/green.png', 1), (50, 50))
+    pink_img=cv2.resize(cv2.imread('images/pink.png', 1), (50, 50))
+    red_img=cv2.resize(cv2.imread('images/red.png', 1), (50, 50))
+    white_img=cv2.resize(cv2.imread('images/white.png', 1), (50, 50))
 
     #펜 크기
-    pen5_img=cv2.resize(cv2.imread('images/5px.png', 1), (100, 100))
-    pen10_img=cv2.resize(cv2.imread('images/10px.png', 1), (100, 100))
-    pen15_img=cv2.resize(cv2.imread('images/15px.png', 1), (100, 100))
-    pen20_img=cv2.resize(cv2.imread('images/20px.png', 1), (100, 100))
-    pen30_img=cv2.resize(cv2.imread('images/30px.png', 1), (100, 100))
+    pen5_img=cv2.resize(cv2.imread('images/5px.png', 1), (50, 50))
+    pen10_img=cv2.resize(cv2.imread('images/10px.png', 1), (50, 50))
+    pen15_img=cv2.resize(cv2.imread('images/15px.png', 1), (50, 50))
+    pen20_img=cv2.resize(cv2.imread('images/20px.png', 1), (50, 50))
+    pen30_img=cv2.resize(cv2.imread('images/30px.png', 1), (50, 50))
 
     kernel = np.ones((5, 5), np.uint8)
 
@@ -261,19 +261,19 @@ def start_blackboard():
 
         #640,360
         # 왼쪽 아래 대각선
-        add_chacol_frame = mask[110:210, 840:940]
+        add_chacol_frame = mask[110:160, 0:50]
         add_chacol_thresh = np.sum(add_chacol_frame == 255)
         # 아래쪽
-        add_green_frame = mask[210:310, 840:940]
+        add_green_frame = mask[210:260, 0:50]
         add_green_thresh = np.sum(add_green_frame == 255)
         # 오른쪽 아래 대각선
-        add_pink_frame = mask[310:410, 840:940]
+        add_pink_frame = mask[310:360, 0:50]
         add_pink_thresh = np.sum(add_pink_frame == 255)
         # 오른쪽
-        add_red_frame = mask[410:510, 840:940]
+        add_red_frame = mask[410:460, 0:50]
         add_red_thresh = np.sum(add_red_frame == 255)
         # 왼쪽 위 대각선
-        add_white_frame = mask[510:610, 840:940]
+        add_white_frame = mask[510:560, 0:50]
         add_white_thresh = np.sum(add_white_frame == 255)
 
 
@@ -412,8 +412,6 @@ def start_blackboard():
 
                 canvas[esty:eedy, estx:eedx] = 0
                 tmpcanvas[ypoint:ypoint+height-suby,xpoint:xpoint+width-subx] = big[0:height-suby,0:width-subx]
-                #cv2.imshow('test',big[0:height-suby,0:width-subx])
-                #print('{0},{1},{2},{3}'.format(suby, subx, height, width))
 
             else:
                 small = cv2.resize(tmpimg, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)
@@ -451,23 +449,21 @@ def start_blackboard():
                     change_color=False
                 else:
                     # 640,360
-                    frame[110:210, 840:940] = chacol_img
-                    frame[210:310, 840:940] = green_img
-                    frame[310:410, 840:940] = pink_img
-                    frame[410:510, 840:940] = red_img
-                    frame[510:610, 840:940] = white_img
+                    frame[110:160, 0:50] = chacol_img
+                    frame[210:260, 0:50] = green_img
+                    frame[310:360, 0:50] = pink_img
+                    frame[410:460, 0:50] = red_img
+                    frame[510:560, 0:50] = white_img
 
             if change_font_size == True:
                 if change_color == True:
                     change_font_size = False
                 else:
-                    frame[110:210, 840:940] = pen5_img
-                    frame[210:310, 840:940] = pen10_img
-                    frame[310:410, 840:940] = pen15_img
-                    frame[410:510, 840:940] = pen20_img
-                    frame[510:610, 840:940] = pen30_img
-
-        tmpcanvas = None
+                    frame[110:160, 0:50] = pen5_img
+                    frame[210:260, 0:50] = pen10_img
+                    frame[310:360, 0:50] = pen15_img
+                    frame[410:460, 0:50] = pen20_img
+                    frame[510:560, 0:50] = pen30_img
 
         # 프레임 쇼
         cv2.imshow('Untacked Virtual Blackboard', frame)
@@ -613,8 +609,6 @@ def start_blackboard():
                 font_color[2]=255
                 change_color = False
 
-            draw_delay = True
-
         if change_font_size == True:
 
             if add_chacol_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
@@ -645,8 +639,6 @@ def start_blackboard():
                 font_size = 30
                 font_size_erase = 150
                 change_font_size = False
-
-            draw_delay = True
 
     cv2.destroyAllWindows()
     cap.release()
