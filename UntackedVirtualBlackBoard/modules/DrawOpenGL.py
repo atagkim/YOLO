@@ -80,7 +80,7 @@ def reset():
     global win
     win = pygame.display.set_mode(display)
     pygame.display.set_caption("Draw 3D")
-    background = pygame.image.load("tmp.jpg")
+    background = pygame.image.load("images/tmp.jpg")
     win.blit(background,(0,0))
 
 def rotate():
@@ -168,7 +168,7 @@ def myOpenGL():
         k = pygame.key.get_pressed()
         if k[pygame.K_s]:
             chk_first=False
-            pygame.image.save(win, '3D.png')
+            pygame.image.save(win, 'images/3D.png')
             pygame.quit()
             break
 

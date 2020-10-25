@@ -114,14 +114,6 @@ def start_blackboard():
     cap.set(3, 1280)
     cap.set(4, 720)
 
-    # 아이콘 로딩
-    pen_img = cv2.resize(cv2.imread('images/pen.png', 1), (50, 50))
-    eraser_img = cv2.resize(cv2.imread('images/eraser.jpg', 1), (50, 50))
-    paint_cap_img = cv2.resize(cv2.imread('images/camera1.png', 1), (50, 50))
-    change_color_img = cv2.resize(cv2.imread('images/change_color_img.png', 1), (50, 50))
-    change_font_size_img = cv2.resize(cv2.imread('images/change_font_size.png', 1), (50, 50))
-    add_3d_img = cv2.resize(cv2.imread('images/tmp.png', 1), (50, 50))
-
     #툴바
     tool_eraser_img=cv2.resize(cv2.imread('images/tool_eraser.png', 1), (650, 50))
     tool_pen_img=cv2.resize(cv2.imread('images/tool_pen.png', 1), (650, 50))
@@ -259,20 +251,19 @@ def start_blackboard():
         font_size_thresh = np.sum(change_font_size_frame == 255)
         add_3d_thresh = np.sum(add_3d_frame == 255)
 
-        #640,360
-        # 왼쪽 아래 대각선
+        # 첫번째
         add_chacol_frame = mask[110:160, 0:50]
         add_chacol_thresh = np.sum(add_chacol_frame == 255)
-        # 아래쪽
+        # 두번째
         add_green_frame = mask[210:260, 0:50]
         add_green_thresh = np.sum(add_green_frame == 255)
-        # 오른쪽 아래 대각선
+        # 세번째
         add_pink_frame = mask[310:360, 0:50]
         add_pink_thresh = np.sum(add_pink_frame == 255)
-        # 오른쪽
+        # 네번째
         add_red_frame = mask[410:460, 0:50]
         add_red_thresh = np.sum(add_red_frame == 255)
-        # 왼쪽 위 대각선
+        # 다섯번째
         add_white_frame = mask[510:560, 0:50]
         add_white_thresh = np.sum(add_white_frame == 255)
 
@@ -522,7 +513,7 @@ def start_blackboard():
             if tmpcanvas is None:
                 tmpcanvas = np.zeros_like(frame)
             DrawOpenGL.myOpenGL()
-            cube_img = cv2.resize(cv2.imread('3D.png', 1), (500, 500))
+            cube_img = cv2.resize(cv2.imread('images/3D.png', 1), (500, 500))
             tmpcanvas[100:600, 400:900] = cube_img
             canvas = cv2.add(canvas, tmpcanvas)
             tmpcanvas=None
