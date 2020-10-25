@@ -1,13 +1,12 @@
 import socket
 from threading import Thread
+import pickle
 
 HOST, PORT = "", 9876
 ADDR = (HOST, PORT)
 BUFF_SIZE = 1024
 TEACHER = b"0"
 STUDENT = b"1"
-teacher_sock = "x"
-sv = 1
 
 class StudentThread(Thread):
     def __init__(self,host,port,sock,id):
@@ -19,9 +18,6 @@ class StudentThread(Thread):
         print('[Student({}, {})]: connected'.format(self.host, self.port))
 
     def run(self):
-        global teacher_sock
-        global sv
-
         while True:
             data = self.client_sock.recv(BUFF_SIZE)
             if not data:
@@ -29,11 +25,15 @@ class StudentThread(Thread):
                 break
             print('[Student({}, {})]: {}'.format(self.host, self.port, data.decode()))
 
-            teacher_sock.send(data.encode())
             try:
-                sv += 1
+                with open('ts.p', 'rb') as file:
+                    teacher_sock = pickle.load(file)
+                try:
+                    teacher_sock.send(data.encode())
+                except:
+                    print("Teacher is not connected")
             except:
-                print("Teacher is not connected")
+                print("Teacher socket doesn't exit")
 
 
 class TeacherThread(Thread):
@@ -45,12 +45,15 @@ class TeacherThread(Thread):
         self.id = id
         print('[Teacher({}, {})]: connected'.format(self.host, self.port))
 
+
     def run(self):
         import time
-        global sv
+        global teacher_sock
+        teacher_sock = self.client_sock
+
         while True:
             time.sleep(1)
-            print("sv:", sv)
+            print("tick")
             # data = self.client_sock.recv(BUFF_SIZE)
             # if not data:
             #     break
