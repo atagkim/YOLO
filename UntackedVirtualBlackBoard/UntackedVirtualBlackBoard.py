@@ -10,6 +10,11 @@ import socket
 BUFF_SIZE = 1024
 TEACHER = "0"
 
+studentflag2 = 0
+studenttime = 0
+studentflag = 0
+studentname = None
+
 OUR_IP_ADDR = "3.34.49.51"
 # OUR_IP_ADDR = "127.0.0.1"
 
@@ -372,6 +377,24 @@ def start_blackboard():
         background = cv2.bitwise_and(frame, frame, mask=cv2.bitwise_not(mask))
         frame = cv2.add(foreground, background)
 
+        global studentflag2
+        global studentflag
+        global studentname
+
+        if(studentflag==1):
+            if(studentflag2 == 0):
+                studenttime = time.time()
+                studentflag2 = 1
+
+            if(time.time() - studenttime < 1):
+
+                message = studentname
+                message = message + " student no attention"
+                cv2.putText(frame, message, (640, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 0)
+
+            else:
+                studentflag = 0
+                studentflag2 = 0
 
         # 잘라내기 기능
         if cutchk == True:
@@ -658,6 +681,7 @@ def start_blackboard():
 
 
 def check_student():
+
     # ip address and port of the server
     HOST, PORT = OUR_IP_ADDR, 9876
     client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -669,8 +693,15 @@ def check_student():
     client_sock.send(data.encode())
 
     while True:
+
+        global studentname
+        global studentflag
         # 졸고 있는 학생 이름
         data = client_sock.recv(BUFF_SIZE)
+
+        studentflag = 1
+        studentname = data.decode('utf-8')
+
         print("from server: {}".format(data))
 
 
