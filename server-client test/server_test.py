@@ -47,6 +47,7 @@ class TeacherThread(Thread):
 
     def run(self):
         import time
+        global sv
         while True:
             time.sleep(1)
             print("sv:", sv)
