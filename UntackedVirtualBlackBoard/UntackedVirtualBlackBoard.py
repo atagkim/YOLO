@@ -260,19 +260,19 @@ def start_blackboard():
         add_3d_thresh = np.sum(add_3d_frame == 255)
 
         #640,360
-        # 왼쪽 아래 대각선
+        # 1번째
         add_chacol_frame = mask[110:210, 840:940]
         add_chacol_thresh = np.sum(add_chacol_frame == 255)
-        # 아래쪽
+        # 두번째
         add_green_frame = mask[210:310, 840:940]
         add_green_thresh = np.sum(add_green_frame == 255)
-        # 오른쪽 아래 대각선
+        # 세번째
         add_pink_frame = mask[310:410, 840:940]
         add_pink_thresh = np.sum(add_pink_frame == 255)
-        # 오른쪽
+        # 네번째
         add_red_frame = mask[410:510, 840:940]
         add_red_thresh = np.sum(add_red_frame == 255)
-        # 왼쪽 위 대각선
+        # 
         add_white_frame = mask[510:610, 840:940]
         add_white_thresh = np.sum(add_white_frame == 255)
 
@@ -450,7 +450,6 @@ def start_blackboard():
                 if change_font_size==True:
                     change_color=False
                 else:
-                    # 640,360
                     frame[110:210, 840:940] = chacol_img
                     frame[210:310, 840:940] = green_img
                     frame[310:410, 840:940] = pink_img
