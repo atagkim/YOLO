@@ -4,44 +4,79 @@ from threading import Thread
 HOST, PORT = "", 9876
 ADDR = (HOST, PORT)
 BUFF_SIZE = 1024
+TEACHER = b"0"
+STUDENT = b"1"
+teacher_sock = "x"
+sv = 1
 
-
-class ClientThread(Thread):
-    def __init__(self,host,port,sock):
+class StudentThread(Thread):
+    def __init__(self,host,port,sock,id):
         Thread.__init__(self)
         self.host = host
         self.port = port
         self.client_sock = sock
-        print('[Client({}, {})]: connected'.format(self.host, self.port))
+        self.id = id
+        print('[Student({}, {})]: connected'.format(self.host, self.port))
 
     def run(self):
+        global teacher_sock
+        global sv
+
         while True:
             data = self.client_sock.recv(BUFF_SIZE)
             if not data:
-                print('[Client({}, {})]: closed'.format(self.host, self.port))
+                print('[Student({}, {})]: closed'.format(self.host, self.port))
                 break
+            print('[Student({}, {})]: {}'.format(self.host, self.port, data.decode()))
 
-            print('[Client({}, {})]: {}'.format(self.host, self.port, data.decode()))
+            teacher_sock.send(data.encode())
+            try:
+                sv += 1
+            except:
+                print("Teacher is not connected")
+
+
+class TeacherThread(Thread):
+    def __init__(self, host, port, sock, id):
+        Thread.__init__(self)
+        self.host = host
+        self.port = port
+        self.client_sock = sock
+        self.id = id
+        print('[Teacher({}, {})]: connected'.format(self.host, self.port))
+
+    def run(self):
+        import time
+        global sv
+        while True:
+            time.sleep(1)
+            print("sv:", sv)
+            # data = self.client_sock.recv(BUFF_SIZE)
+            # if not data:
+            #     break
+
 
 def main():
-    serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    serverSocket.bind(ADDR)
-    threads = []
+    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_sock.bind(ADDR)
 
-    serverSocket.listen(5)
+    server_sock.listen(5)
 
     while True:
         print("Waiting for connections...")
-        (clientSocket, (host, port)) = serverSocket.accept()
+        (client_sock, (host, port)) = server_sock.accept()
         print('Connection from ', (host, port))
 
-        newthread = ClientThread(host, port, clientSocket)
+        id = client_sock.recv(BUFF_SIZE)
+        print("id: {}".format(id))
+        if id==TEACHER:
+            newthread = TeacherThread(host, port, client_sock, id)
+            print("Teacher is connected")
+        elif id==STUDENT:
+            newthread = StudentThread(host, port, client_sock, id)
+            print("Student is connected")
         newthread.start()
-        threads.append(newthread)
-
-        for t in threads:
-            t.join()
 
 
 if __name__ == "__main__":
