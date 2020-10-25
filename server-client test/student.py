@@ -182,7 +182,7 @@ if __name__ == "__main__":
 
     while (True):
         time.sleep(1)
-        data = '{} no attention'.format("test")
+        data = '{}'.format("honghong")
         print("data: ", data)
 
         client_sock.send(data.encode())
