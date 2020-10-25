@@ -3,6 +3,7 @@ import numpy as np
 import time
 import keyboard
 import modules.DrawOpenGL as DrawOpenGL
+import modules.helper as helper
 from PIL import ImageGrab
 
 # 콜백용으로 만들어놓은 아무것도 아닌 함수
@@ -117,6 +118,7 @@ def start_blackboard():
     #툴바
     tool_eraser_img=cv2.resize(cv2.imread('images/tool_eraser.png', 1), (650, 50))
     tool_pen_img=cv2.resize(cv2.imread('images/tool_pen.png', 1), (650, 50))
+    help_img=cv2.resize(cv2.imread('images/help.png', 1), (50, 50))
 
     #색깔
     chacol_img=cv2.resize(cv2.imread('images/chacol.png', 1), (50, 50))
@@ -177,6 +179,7 @@ def start_blackboard():
     change_color = False
     change_font_size = False
     add_3d=False
+    help_chk = False
 
     # 딜레이용 변수들
     draw_delay = False
@@ -243,6 +246,7 @@ def start_blackboard():
         change_color_frame = mask[0:50, 300:350]
         change_font_size_frame = mask[0:50, 450:500]
         add_3d_frame = mask[0:50, 600:650]
+        help_frame = mask[0:50, 1230:1280]
 
         # Note the number of pixels that are white,this is the level of disruption.
         switch_thresh = np.sum(pen_or_eraser_frame == 255)
@@ -250,6 +254,7 @@ def start_blackboard():
         change_color_thresh = np.sum(change_color_frame == 255)
         font_size_thresh = np.sum(change_font_size_frame == 255)
         add_3d_thresh = np.sum(add_3d_frame == 255)
+        help_thresh = np.sum(help_frame == 255)
 
         # 첫번째
         add_chacol_frame = mask[110:160, 0:50]
@@ -308,6 +313,10 @@ def start_blackboard():
             last_switch = time.time()
 
             add_3d = True
+
+        if help_thresh > background_threshold and (time.time() - last_switch - additinalDelay) > 1:
+            last_switch = time.time()
+            help_chk = True
 
 
         # Make sure there is a contour present and also its size is bigger than noise threshold.
@@ -421,6 +430,7 @@ def start_blackboard():
             redchk=False
 
 
+        frame[0:50, 1230:1280] = help_img
         # 기능버튼 아이콘 변경
         if switch != 'Pen':
             cv2.circle(frame, (x1, y1), font_size_erase, (255, 255, 255), -1)
@@ -435,26 +445,26 @@ def start_blackboard():
             #frame[0:50, 450:500] = change_font_size_img
             #frame[0:50, 600:650] = add_3d_img
 
-            if change_color == True :
-                if change_font_size==True:
-                    change_color=False
-                else:
-                    # 640,360
-                    frame[110:160, 0:50] = chacol_img
-                    frame[210:260, 0:50] = green_img
-                    frame[310:360, 0:50] = pink_img
-                    frame[410:460, 0:50] = red_img
-                    frame[510:560, 0:50] = white_img
+        if change_color == True :
+            if change_font_size==True:
+                change_color=False
+            else:
+                # 640,360
+                frame[110:160, 0:50] = chacol_img
+                frame[210:260, 0:50] = green_img
+                frame[310:360, 0:50] = pink_img
+                frame[410:460, 0:50] = red_img
+                frame[510:560, 0:50] = white_img
 
-            if change_font_size == True:
-                if change_color == True:
-                    change_font_size = False
-                else:
-                    frame[110:160, 0:50] = pen5_img
-                    frame[210:260, 0:50] = pen10_img
-                    frame[310:360, 0:50] = pen15_img
-                    frame[410:460, 0:50] = pen20_img
-                    frame[510:560, 0:50] = pen30_img
+        if change_font_size == True:
+            if change_color == True:
+                change_font_size = False
+            else:
+                frame[110:160, 0:50] = pen5_img
+                frame[210:260, 0:50] = pen10_img
+                frame[310:360, 0:50] = pen15_img
+                frame[410:460, 0:50] = pen20_img
+                frame[510:560, 0:50] = pen30_img
 
         # 프레임 쇼
         cv2.imshow('Untacked Virtual Blackboard', frame)
@@ -630,6 +640,11 @@ def start_blackboard():
                 font_size = 30
                 font_size_erase = 150
                 change_font_size = False
+
+        if help_chk == True:
+            print('hi')
+            helper.helper_func()
+            help_chk = False
 
     cv2.destroyAllWindows()
     cap.release()
