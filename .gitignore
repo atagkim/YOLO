@@ -1,28 +1,10 @@
 *penval.npy
 *venv
 
-newTech/opencv/
-
-newTech/faceDetection/*
-!newTech/faceDetection/*.cpp
-
-newTech/fingerDraw/venv/
-newTech/fingerDraw/.idea/
-
-newTech/Yororong/venv/
-newTech/Yororong/.idea/
-
-newTech/faceDetection2/venv/
-newTech/faceDetection2/.idea/
-
 UntackedVirtualBlackBoard/.idea/
 UntackedVirtualBlackBoard/venv/
 UntackedVirtualBlackBoard/save/
 UntackedVirtualBlackBoard/penval.npy
 UntackedVirtualBlackBoard/__pycache__/
-
-cameraCalibration/.idea/
-cameraCalibration/venv/
-cameraCalibration/__pycache__/
 
 .idea/
