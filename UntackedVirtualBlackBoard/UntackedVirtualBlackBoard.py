@@ -390,7 +390,7 @@ def start_blackboard():
 
                 message = studentname
                 message = message + " student no attention"
-                cv2.putText(frame, message, (640, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 0)
+                cv2.putText(frame, message, (500, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 0)
 
             else:
                 studentflag = 0
