@@ -526,7 +526,7 @@ def start_blackboard():
             if tmpcanvas is None:
                 tmpcanvas = np.zeros_like(frame)
             DrawOpenGL.myOpenGL()
-            cube_img = cv2.resize(cv2.imread('Cube.png', 1), (500, 500))
+            cube_img = cv2.resize(cv2.imread('3D.png', 1), (500, 500))
             tmpcanvas[100:600, 400:900] = cube_img
             canvas = cv2.add(canvas, tmpcanvas)
             tmpcanvas=None
