@@ -143,24 +143,24 @@ def setting():
 
 def myOpenGL():
     reset()
+    global chk_first
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
         key_input()
-        global chk_first
         if chk_first==True:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             rotate()
-        if chk_shape=='Cube':
+        if chk_shape == 'Cube':
             if chk_first==False:
                 setting()
-            chk_first=True
+            chk_first = True
             drawCube()
 
-        elif chk_shape=='Pyramid':
-            if chk_first==False:
+        elif chk_shape == 'Pyramid':
+            if chk_first == False:
                 setting()
             chk_first=True
             drawPyramid()
@@ -170,10 +170,13 @@ def myOpenGL():
             chk_first=False
             pygame.image.save(win, 'images/3D.png')
             pygame.quit()
+            return True
             break
 
         if k[pygame.K_ESCAPE]:
             pygame.quit()
+            chk_first = False
+            return False
             break
 
         pygame.display.flip()

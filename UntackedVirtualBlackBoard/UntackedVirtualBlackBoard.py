@@ -14,6 +14,8 @@ studentflag2 = 0
 studenttime = 0
 studentflag = 0
 studentname = None
+screentime = 0
+screenflag = False
 
 OUR_IP_ADDR = "3.34.49.51"
 # OUR_IP_ADDR = "127.0.0.1"
@@ -184,6 +186,7 @@ def start_blackboard():
     expchk = False
     redchk = False
     v_chk = False
+    z_chk = False
 
     # 기능들 초기 상태
     clear = False
@@ -381,6 +384,14 @@ def start_blackboard():
         global studentflag
         global studentname
 
+        global screentime
+        global screenflag
+        if screenflag == True:
+            if time.time() - screentime < 1:
+                cv2.putText(frame, "ScreenShot Completed", (0, 200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1, cv2.LINE_AA)
+            else:
+                screenflag = False
+
         if(studentflag==1):
             if(studentflag2 == 0):
                 studenttime = time.time()
@@ -409,6 +420,9 @@ def start_blackboard():
                     tmpcanvas[y2 + i][x2 + j] = cutcanvas[sty + i][stx + j]
 
             frame = cv2.add(frame, tmpcanvas)
+            if z_chk == True:
+                canvas = cv2.add(canvas,tmpcanvas)
+                z_chk = False
             if v_chk == False:
                 for i in range(0, cuty):
                     for j in range(0, cutx):
@@ -519,6 +533,10 @@ def start_blackboard():
         elif k == ord('v'):
             v_chk = True
 
+        # z
+        elif k == ord('z'):
+            z_chk = True
+
         # 확대축소 기능
         elif k== ord('a'):
             estx, esty = x2, y2
@@ -541,8 +559,8 @@ def start_blackboard():
             im = ImageGrab.grabclipboard()
             try:
                 im.save('images/clipboard.png', 'PNG')  # PNG 포맷으로 저장
-                clipboard_img = cv2.resize(cv2.imread('images/clipboard.png', 1), (500, 500))
-                tmpcanvas[100:600,400:900]=clipboard_img
+                clipboard_img = cv2.resize(cv2.imread('images/clipboard.png', 1), (250, 250))
+                tmpcanvas[225:475,525:775]=clipboard_img
                 canvas=cv2.add(canvas,tmpcanvas)
             except AttributeError:
                 print("클립보드에 이미지가 없습니다")
@@ -552,10 +570,10 @@ def start_blackboard():
         if add_3d==True:
             if tmpcanvas is None:
                 tmpcanvas = np.zeros_like(frame)
-            DrawOpenGL.myOpenGL()
-            cube_img = cv2.resize(cv2.imread('images/3D.png', 1), (500, 500))
-            tmpcanvas[100:600, 400:900] = cube_img
-            canvas = cv2.add(canvas, tmpcanvas)
+            if DrawOpenGL.myOpenGL():
+                cube_img = cv2.resize(cv2.imread('images/3D.png', 1), (500, 500))
+                tmpcanvas[100:600, 400:900] = cube_img
+                canvas = cv2.add(canvas, tmpcanvas)
             tmpcanvas=None
             add_3d=False
 
@@ -570,7 +588,6 @@ def start_blackboard():
             clear = False
 
             draw_delay = True
-
         # 캡쳐 기능 동작
         if paint_cap == True:
 
@@ -580,6 +597,11 @@ def start_blackboard():
             paint_cap = False
             screenshotCnt += 1
             draw_delay = True
+            screentime = time.time()
+            screenflag = True
+
+
+
 
         # 펜 속성 변경
         if change_color == True:
@@ -672,7 +694,6 @@ def start_blackboard():
                 change_font_size = False
 
         if help_chk == True:
-            print('hi')
             helper.helper_func()
             help_chk = False
 
