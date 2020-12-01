@@ -1,10 +1,6 @@
-*penval.npy
-*venv
 
 UntackedVirtualBlackBoard/.idea/
 UntackedVirtualBlackBoard/venv/
-UntackedVirtualBlackBoard/penval.npy
-UntackedVirtualBlackBoard/__pycache__/
-*__pycache__*
+UntackedVirtualBlackBoard/modules/__pycache__/
 
-.idea/
+UntackedVirtualBlackBoard/penval.npy
